@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html lang="en">
+
+<head th:replace="snippets.html :: name_head"></head>
+
+<body>
+
+<nav th:replace="snippets.html :: name_app_navbar"></nav>
+
+<div class="container">
+
+<h3>Day on Day Report</h3>
+
+	<div class="row">
+		&nbsp;
+	</div>
+ <!-- Top row with form-->
+ <div class="row">
+	 <div class="col-12">
+		 	<button type="button" class="btn btn-primary my-1 mr-2" id="generate-report">Generate Report</button>
+		 <button type="button" class="btn btn-primary my-1 mr-2" id="refresh-report">Refresh</button>
+	 </div>
+</div> 
+
+
+<!-- Blank Row -->
+<div class="row">
+	&nbsp;
+</div>
+<div class="row" id="report">
+
+ <!-- Table -->
+ <div class="col-12">
+	<table class="table table-striped" id="daily-report-table">
+	  <thead>
+	    <tr>
+			<th scope="col">S.No.</th>
+	      <th scope="col">Date</th>
+	      <th scope="col">Invoiced Orders</th>
+			<th scope="col">Invoiced Items</th>
+			<th scope="col">Total Revenue</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+
+	  </tbody>
+	</table>
+
+</div>
+</div>
+
+
+
+</div> <!-- Container end-->
+
+<footer th:replace="snippets.html :: name_footer"></footer>
+
+<script th:src="@{/static/daily-report.js}"/></script>
+
+</body>	
+
+</html>

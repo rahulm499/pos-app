@@ -1,0 +1,31 @@
+<!doctype html>
+
+<html lang="en">
+
+<head th:replace="snippets.html :: name_head"></head>
+
+<body>
+
+<nav th:replace="snippets.html :: name_site_navbar"></nav>
+
+<div class="container">
+<div class="row">
+<div class="col-6">
+ 
+<div class="jumbotron">
+  <h1 class="display-4">Point of Sale</h1>
+  <p class="lead">Welcome to Increff POS</p>
+  <hr class="my-4">
+  <p>This application helps to add brands, manage inventory and place orders. It also helps to generate invoice for orders placed.</p>
+  <a class="btn btn-primary btn-lg" th:href="@{/site/login}" role="button">Get Started</a>
+</div>
+
+</div>
+</div>
+</div> <!--Container-->
+
+<footer th:replace="snippets.html :: name_footer"></footer>
+
+</body>
+
+</html>
