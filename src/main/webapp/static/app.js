@@ -90,3 +90,24 @@ function writeFileData(arr){
     tempLink.setAttribute('download', 'download.tsv');
     tempLink.click(); 
 }
+
+function setActive(){
+var navLinks = document.querySelectorAll('.nav-link');
+
+// Get the current URL
+var currentURL = window.location.href;
+
+// Loop through all the navbar links
+for (var i = 0; i < navLinks.length; i++) {
+  var link = navLinks[i];
+  // If the link URL matches the current URL
+  if (link.href === currentURL) {
+    // Add the active class to the link
+    link.classList.add('active');
+    link.style.borderBottom = "2px solid #f16366";
+
+  }
+}}
+
+$(document).ready(setActive());
+
