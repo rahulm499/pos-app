@@ -1,4 +1,6 @@
-
+function getRole(){
+	return $("meta[name=role]").attr("content")
+}
 //HELPER METHOD
 function toJson($form){
     var serialized = $form.serializeArray();
@@ -13,7 +15,7 @@ function toJson($form){
 }
 function handleSuccessMessage(response){
 	toastr.options = {
-      "closeButton": true,
+        "closeButton": true,
         "debug": false,
         "newestOnTop": true,
         "progressBar": false,
@@ -29,7 +31,7 @@ function handleSuccessMessage(response){
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     }
-	toastr["success"](response);
+	toastr["success"](response, "Success:");
 	return;
 }
 
@@ -53,7 +55,7 @@ function handleAjaxError(response){
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     }
-	toastr["error"](response.message);
+	toastr["error"](response.message, "Error:");
 }
 
 function readFileData(file, callback){
@@ -105,9 +107,14 @@ for (var i = 0; i < navLinks.length; i++) {
     // Add the active class to the link
     link.classList.add('active');
     link.style.borderBottom = "2px solid #f16366";
-
   }
-}}
+}
+}
 
 $(document).ready(setActive());
-
+$(document).ready(()=>{
+    console.log(getRole())
+    if(getRole()==='supervisor'){
+        $("#admin").prop("hidden", false)
+    }
+})

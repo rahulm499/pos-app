@@ -8,18 +8,18 @@
 
 <nav th:replace="snippets.html :: name_app_navbar"></nav>
 
-<div class="container">
+<div class="container mt-5 col-9">
 
-<h3> Orders</h3>
-
+<h1> Orders</h1>
+	<div class="row">
+		&nbsp;
+	</div>
  <!-- Top row with form-->
  <div class="row">
 	 <div class="col-12">
 			<form class="form-inline" id="order-form">
+			  <button type="button" class="btn btn-dark custom-button" id="create-order-item"><i class="material-icons">add</i>Create Order</button>
 
-			  <button type="button" class="btn btn-dark" id="create-order-item">Create Order</button>
-				&nbsp;
-			  <button type="button" class="btn btn-dark" id="refresh-data">Refresh</button>
 			</form>
 	 </div>	
 </div> 
@@ -34,11 +34,12 @@
  <!-- Table -->
  <div class="col-12">
 	<table class="table table-striped" id="order-table">
-	  <thead>
+	  <thead class="table-dark">
 	    <tr>
-	      <th scope="col">OrderId</th>
-	      <th scope="col">Created At</th>
-		  <th scope="col">Action</th>
+	      <th scope="col" class="col-3">OrderId</th>
+	      <th scope="col" class="col-4">Created At</th>
+		  <th scope="col" class="col-3 text-center">Actions</th>
+			<th scope="col" class="col-2 text-center">Invoice</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -60,26 +61,28 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<form class="form-inline" id="order-cart-form">
-						<div class="form-group">
-							<label for="inputBarcode" class="col-sm-2 col-form-label">Barcode</label>
-							<div class="col-sm-10">
+					<form class="form" id="order-cart-form">
+						<div class="form-row">
+						<div class="form-group col-4">
+							<label for="inputBarcode">Barcode</label>
+							<div>
 								<input type="text" class="form-control" name="barcode" id="inputBarcode" placeholder="Enter Barcode">
 							</div>
 						</div>
-						<div class="form-group">
-							<label for="inputQuantity" class="col-sm-2 col-form-label">Quantity</label>
-							<div class="col-sm-10">
+						<div class="form-group col-4">
+							<label for="inputQuantity">Quantity</label>
+							<div >
 								<input type="number" class="form-control" name="quantity" id="inputQuantity" placeholder="Enter Quantity">
 							</div>
 						</div>
-						<div class="form-group">
-							<label for="inputSellingPrice" class="col-sm-2 col-form-label">Selling Price</label>
-							<div class="col-sm-10">
+						<div class="form-group col-4">
+							<label for="inputSellingPrice">Selling Price</label>
+							<div>
 								<input type="number" class="form-control" name="sellingPrice" id="inputSellingPrice" placeholder="Enter Price">
 							</div>
 						</div>
-						<button type="button" class="btn btn-primary" id="add-order">Add Item</button>
+						</div>
+						<button type="button" class="btn btn-dark" id="add-order">Add Item</button>
 					</form>
 
 				</div>
@@ -90,13 +93,13 @@
 
 					<!-- Table -->
 					<div class="col-12">
-						<table class="table table-striped" id="order-item-table">
+						<table class="table table-hover" id="order-item-table">
 							<thead>
 							<tr>
 								<th scope="col">Barcode</th>
 								<th scope="col">Quantity</th>
 								<th scope="col">Selling Price</th>
-								<th scope="col">Actions</th>
+								<th scope="col" class="text-center">Action</th>
 							</tr>
 							</thead>
 							<tbody>
@@ -107,8 +110,8 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="place-order">Place Order</button>
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-dark" id="place-order">Place Order</button>
 				</div>
 
 			</div>
@@ -134,7 +137,7 @@
 				<div class="row">
 					<!-- Table -->
 					<div class="col-12">
-						<table class="table table-striped" id="order-view-item-table">
+						<table class="table table-hover" id="order-view-item-table">
 							<thead>
 							<tr>
 								<th scope="col">Barcode</th>
@@ -150,7 +153,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
 				</div>
 
 			</div>

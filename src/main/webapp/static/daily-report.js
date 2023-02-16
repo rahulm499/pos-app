@@ -57,7 +57,7 @@ function displayDailyList(data){
 		console.log(e);
 		index+=1
 		var row = '<tr>'
-		+ '<td>' + index + '</td>'
+		+ '<th scope="row">' + index + '</th>'
 		+ '<td>' + convertDateTime(e.date) + '</td>'
 		+ '<td>'  + e.invoiced_orders_count + '</td>'
 		+ '<td>'  + e.invoiced_items_count + '</td>'

@@ -70,6 +70,7 @@ public class OrderDto {
         data.setId(orderPojo.getId());
         data.setDateTime(String.valueOf(orderPojo.getCreated_at().withZoneSameInstant(ZoneId.of("UTC") )));
         data.setOrder(orderItemDataList);
+        data.setIsInvoiceGenerated(orderPojo.getIsInvoiceGenerated());
         return data;
     }
     protected void normalizeOrder(OrderForm form){

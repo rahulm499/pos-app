@@ -4,50 +4,54 @@
 
 <head th:replace="snippets.html :: name_head"></head>
 
-<body>
+<body style="height: 80vh">
 
 <nav th:replace="snippets.html :: name_site_navbar"></nav>
 
 
-<div class="container">
+<div class="d-flex align-items-center" style="height: 100%">
+	<div class="card col-md-3 mx-auto">
+		<div class="card-body">
+			<h3>Welcome back</h3>
+			<i class="text-secondary">Welcome back! Please enter your details.</i>
+			<form id="login-form" method="POST" th:action="@{/session/login}">
+				<!-- Email input -->
+				<div class="form-outline">
+					<label class="form-label" for="email"></label>
+					<input type="email" id="email" class="form-control" name="email" placeholder="Email address"/>
+				</div>
 
-<div class="row">
-<div class="col-6">
-	
-	<div class="card">
-  	<div class="card-header">
-    	Login
-  	</div>
-  	<div class="card-body">
-		<form class="form" id="login-form" method="POST" th:action="@{/session/login}">
-			<div class="form-group">
-				<label for="email" class="col-sm-10 col-form-label">Email</label>
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" name="email" id="email" placeholder="enter email">
-			    </div>
+				<!-- Password input -->
+				<div class="form-outline mb-4">
+					<label class="form-label" for="password"></label>
+					<input type="password" id="password" class="form-control" name="password" placeholder="Password"/>
+				</div>
+
+				<!-- 2 column grid layout for inline styling -->
+				<div class="row mb-4">
+					<div class="col d-flex justify-content-center">
+						<!-- Checkbox -->
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="" id="remember" checked />
+							<label class="form-check-label" for="remember"> Remember me </label>
+						</div>
+					</div>
+
+					<div class="col">
+						<!-- Simple link -->
+						<a href="#!">Forgot password?</a>
+					</div>
+				</div>
+
+				<!-- Submit button -->
+				<button type="submit" class="btn btn-dark btn-block mb-4" id="login">Login</button>
+			</form>
+				<div class="text-center">
+					<p>Not a member? <a href="#!">Create an account</a></p>
+				</div>
 			</div>
-			<div class="form-group">
-			    <label for="password" class="col-sm-10 col-form-label">Password</label>
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" name="password" id="password" placeholder="password">
-			    </div>
-			</div>
-			<button type="submit" class="btn btn-primary" id="login">Go</button>
-		</form>
 	</div>
-	<div class="card-footer text-danger">
-		[[${info.getMessage()}]]
-	</div>
-	
-	</div>
-	
-	
-
-</div> <!-- Col -->
-</div> <!-- Row -->
-
-</div> <!-- Container-->
-
+</div>
 <footer th:replace="snippets.html :: name_footer"></footer>
 
 </body>

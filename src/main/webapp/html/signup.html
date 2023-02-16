@@ -1,0 +1,43 @@
+<!doctype html>
+
+<html lang="en">
+
+<head th:replace="snippets.html :: name_head"></head>
+
+<body style="height: 80vh">
+
+<nav th:replace="snippets.html :: name_site_navbar"></nav>
+
+
+<div class="d-flex align-items-center" style="height: 100%">
+	<div class="card col-md-3 mx-auto">
+		<div class="card-body" id="form">
+			<h3>Create Account</h3>
+			<i class="text-secondary">Welcome! Please enter your details.</i>
+			<form id="signup-form">
+				<!-- Email input -->
+				<div class="form-outline">
+					<label class="form-label" for="email"></label>
+					<input type="email" id="email" name="email" class="form-control" placeholder="Email address"/>
+				</div>
+
+				<!-- Password input -->
+				<div class="form-outline mb-4">
+					<label class="form-label" for="password"></label>
+					<input type="password" id="password" name="password" class="form-control" placeholder="Password"/>
+				</div>
+			</form>
+			<!-- Submit button -->
+			<button type="button" class="btn btn-dark btn-block mb-4" id="signup">Sign Up</button>
+			</div>
+		<div class="card-body" id="success" hidden>
+			<h3>Account created successfully!</h3>
+			<i>Redirecting to <a th:href="@{/site/login}">login</a> page in ...... </i><b><i id="count">3</i></b>
+		</div>
+	</div>
+</div>
+<footer th:replace="snippets.html :: name_footer"></footer>
+<script th:src="@{/static/signup.js}"/></script>
+</body>
+
+</html>

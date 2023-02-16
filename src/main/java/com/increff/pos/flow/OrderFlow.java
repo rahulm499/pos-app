@@ -61,6 +61,13 @@ public class OrderFlow {
     }
 
     @Transactional(rollbackOn = ApiException.class)
+    public void updateInvoiceStatus(Integer id) throws ApiException {
+        orderService.update(id);
+    }
+
+
+
+    @Transactional(rollbackOn = ApiException.class)
     public List<OrderItemData> getOrderItems(Integer id) throws ApiException {
         List<OrderItemPojo> orderItemPojoList = orderItemService.getByOrderId(id);
         List<OrderItemData> orderItemDataList = new ArrayList<>();

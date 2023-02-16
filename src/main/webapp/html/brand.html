@@ -8,19 +8,19 @@
 
 <nav th:replace="snippets.html :: name_app_navbar"></nav>
 
-<div class="container">
+<div class="container mt-5 col-9">
 
-<h3> Brands</h3>
-
+<h1> Brands</h1>
+	<div class="row">
+		&nbsp;
+	</div>
  <!-- Top row with form-->
  <div class="row">
 	 <div class="col-12">
 			<form class="form-inline" id="brand-form">
-			  <button type="button" class="btn btn-dark" id="add-form">Add Brand</button>
+			  <button type="button" class="btn btn-dark custom-button" id="add-form"><i class="material-icons">add</i> Add Brand</button>
 				&nbsp;
-			  <button type="button" class="btn btn-dark" id="refresh-data">Refresh</button>
-				&nbsp;
-				<button type="button" class="btn btn-dark" id="upload-data">Upload</button>
+				<button type="button" class="btn btn-dark custom-button" id="upload-data"><i class="material-icons">upload</i>Upload</button>
 			</form>
 	 </div>	
 </div>
@@ -36,22 +36,22 @@
 				<div class="modal-body">
 					<form id="brand-add-form">
 						<div class="form-group">
-							<label for="inputBrand" class="col-sm-2 col-form-label">Brand</label>
-							<div class="col-sm-10">
-								<input type="text" class="form-control" required name="brand" id="inputBrand" placeholder="Enter brand" >
+							<label for="inputBrand">Brand</label>
+							<div>
+								<input type="text" class="form-control" required name="brand" id="inputBrand" placeholder="Enter brand" maxlength="100">
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="inputCategory" class="col-sm-2 col-form-label">Category</label>
-							<div class="col-sm-10">
-								<input type="text" class="form-control" required name="category" id="inputCategory" placeholder="Enter category" >
+							<label for="inputCategory" >Category</label>
+							<div>
+								<input type="text" class="form-control" required name="category" id="inputCategory" placeholder="Enter category" maxlength="100">
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary" id="add-brand">Add</button>
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-dark" id="add-brand">Add</button>
 				</div>
 			</div>
 		</div>
@@ -66,12 +66,12 @@
  <!-- Table -->
  <div class="col-12">
 	<table class="table table-striped" id="brand-table">
-	  <thead>
+	  <thead class="table-dark">
 	    <tr>
-	      <th scope="col">ID</th>
-	      <th scope="col">Brand</th>
-	      <th scope="col">Category</th>
-		  <th scope="col">Action</th>
+	      <th scope="col" class="col-2">#</th>
+	      <th scope="col" class="col-4">Brand</th>
+	      <th scope="col" class="col-4">Category</th>
+		  <th scope="col" class="col-2 text-center">Action</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -93,23 +93,23 @@
 				<div class="modal-body">
 					<form id="brand-edit-form">
 						<div class="form-group">
-							<label for="editBrand" class="col-sm-2 col-form-label">Brand</label>
-							<div class="col-sm-10">
-								<input type="text" class="form-control" required name="brand" id="editBrand" placeholder="Enter brand" >
+							<label for="editBrand" >Brand</label>
+							<div>
+								<input type="text" class="form-control" required name="brand" id="editBrand" placeholder="Enter brand" maxlength="100">
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="editCategory" class="col-sm-2 col-form-label">Category</label>
-							<div class="col-sm-10">
-								<input type="text" class="form-control" required name="category" id="editCategory" placeholder="Enter category" >
+							<label for="editCategory">Category</label>
+							<div>
+								<input type="text" class="form-control" required name="category" id="editCategory" placeholder="Enter category" maxlength="100">
 							</div>
 						</div>
 						<input type="text" class="form-control" name="id" id="editId" hidden="hidden">
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary" id="update-brand">Update</button>
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-dark" id="update-brand">Update</button>
 				</div>
 			</div>
 		</div>

@@ -5,9 +5,19 @@ function getProductUrl(){
 }
 
 //BUTTON ACTIONS
+function productFormToggle(event){
+	//Set the values to update
+	$('#product-add-form input[name=name').val('');
+    $('#product-add-form input[name=barcode').val('');
+    $('#product-add-form input[name=brand_category').val('');
+    $('#product-add-form input[name=brand_name').val('');
+    $('#product-add-form input[name=mrp').val('');
+	$('#product-add-modal').modal('toggle');
+	return false;
+}
 function addProduct(event){
 	//Set the values to update
-	var $form = $("#product-form");
+	var $form = $("#product-add-form");
 	var json = toJson($form);
 	var url = getProductUrl();
 
@@ -20,7 +30,9 @@ function addProduct(event){
        },	   
 	   success: function(response) {
 	        handleSuccessMessage("Product added successfully");
+	        productFormToggle();
 	   		getProductList();
+
 	   },
 	   error: handleAjaxError
 	});
@@ -29,7 +41,6 @@ function addProduct(event){
 }
 
 function updateProduct(event){
-	$('#edit-product-modal').modal('toggle');
 	//Get the ID
 	var id = $("#product-edit-form input[name=id]").val();
 	var url = getProductUrl() + "/" + id;
@@ -37,7 +48,6 @@ function updateProduct(event){
 	//Set the values to update
 	var $form = $("#product-edit-form");
 	var json = toJson($form);
-
 	$.ajax({
 	   url: url,
 	   type: 'PUT',
@@ -46,7 +56,10 @@ function updateProduct(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
+	        $("#edit-product-modal").modal('toggle');
+	        handleSuccessMessage("Product updated successfully");
 	   		getProductList();
+
 	   },
 	   error: handleAjaxError
 	});
@@ -120,7 +133,7 @@ function uploadRows(){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
-	   handleSuccessMessage("Products added successfully");
+	   handleSuccessMessage("Product added successfully");
 	   		uploadRows();  
 	   },
 	   error: function(response){
@@ -143,19 +156,19 @@ function displayProductList(data){
 	$tbody.empty();
 	for(var i in data){
 		var e = data[i];
-		var buttonHtml = '<button onclick="deleteProduct(' + e.id + ')">delete</button>'
-		buttonHtml += ' <button onclick="displayEditProduct(' + e.id + ')">edit</button>'
+		var buttonHtml = ' <button onclick="displayEditProduct(' + e.id + ')" class="btn btn-dark custom-button edit-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
 		var row = '<tr>'
-		+ '<td>' + e.id + '</td>'
+		+ '<th scope="row">' + e.id + '</th>'
 		+ '<td>' + e.barcode + '</td>'
 		+ '<td>'  + e.brand_name + '</td>'
 		+ '<td>' + e.brand_category + '</td>'
         + '<td>'  + e.name + '</td>'
         + '<td>'  + e.mrp + '</td>'
-		+ '<td>' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + buttonHtml + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
+	setRole();
 }
 
 function displayEditProduct(id){
@@ -210,9 +223,16 @@ function displayProduct(data){
 	$('#edit-product-modal').modal('toggle');
 }
 
-
+function setRole(){
+if(getRole() === 'operator'){
+    $('#add-form').prop("disabled", true)
+    $('#upload-data').prop("disabled", true)
+    $(".edit-button").prop("disabled", true);
+}
+}
 //INITIALIZATION CODE
 function init(){
+    $('#add-form').click(productFormToggle);
 	$('#add-product').click(addProduct);
 	$('#update-product').click(updateProduct);
 	$('#refresh-data').click(getProductList);
@@ -224,4 +244,5 @@ function init(){
 
 $(document).ready(init);
 $(document).ready(getProductList);
+$(document).ready(setRole);
 

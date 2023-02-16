@@ -15,6 +15,7 @@ public class OrderHelperUtil {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("UTC-4"));
         System.out.println(zonedDateTime);
         p.setCreated_at(zonedDateTime);
+        p.setIsInvoiceGenerated(Boolean.FALSE);
         System.out.println(p.getCreated_at());
         return p;
     }

@@ -36,8 +36,9 @@ public class OrderService {
     }
 
     @Transactional(rollbackOn  = ApiException.class)
-    public void update(Integer id, OrderPojo p) throws ApiException {
+    public void update(Integer id) throws ApiException {
         OrderPojo ex = getCheck(id);
+        ex.setIsInvoiceGenerated(Boolean.TRUE);
         dao.update(ex);
     }
 

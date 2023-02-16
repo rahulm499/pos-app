@@ -136,6 +136,13 @@ public class ReportsFlow {
         ZonedDateTime startDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).minusDays(1);
         ZonedDateTime endDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).minusSeconds(1);
         System.out.println("Report Generated at "+ LocalDate.now());
-        return orderService.getOrderByDate(startDate, endDate);
+        List<OrderPojo> orderPojoList =  orderService.getOrderByDate(startDate, endDate);
+        List<OrderPojo> newOrderPojoList = new ArrayList<>();
+        for(OrderPojo orderPojo: orderPojoList){
+            if(orderPojo.getIsInvoiceGenerated()){
+                newOrderPojoList.add(orderPojo);
+            }
+        }
+        return newOrderPojoList;
     }
 }

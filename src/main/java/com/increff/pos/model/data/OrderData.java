@@ -15,4 +15,5 @@ public class OrderData{
 
     private String dateTime;
     private List<OrderItemData> order;
+    private Boolean isInvoiceGenerated;
 }

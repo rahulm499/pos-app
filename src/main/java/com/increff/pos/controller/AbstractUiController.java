@@ -18,7 +18,7 @@ public abstract class AbstractUiController {
 	@Value("${app.baseUrl}")
 	private String baseUrl;
 
-	protected ModelAndView mav(String page) {
+	public ModelAndView mav(String page) {
 		// Get current user
 		UserPrincipal principal = SecurityUtil.getPrincipal();
 

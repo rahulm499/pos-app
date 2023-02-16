@@ -41,7 +41,6 @@ public class LoginController {
 		UserPojo p = service.get(f.getEmail());
 		boolean authenticated = (p != null && Objects.equals(p.getPassword(), f.getPassword()));
 		if (!authenticated) {
-			info.setMessage("Invalid username or password");
 			return new ModelAndView("redirect:/site/login");
 		}
 
@@ -53,7 +52,8 @@ public class LoginController {
 		SecurityUtil.createContext(session);
 		// Attach Authentication object to the Security Context
 		SecurityUtil.setAuthentication(authentication);
-
+		//Set Role
+		info.setRole(p.getRole());
 		return new ModelAndView("redirect:/ui/home");
 
 	}

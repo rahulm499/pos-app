@@ -3,11 +3,17 @@ function getInventoryUrl(){
 	var baseUrl = $("meta[name=baseUrl]").attr("content")
 	return baseUrl + "/api/inventory";
 }
-
+function inventoryFormToggle(event){
+	//Set the values to update
+	$('#inventory-add-form input[name=quantity').val('');
+    $('#inventory-add-form input[name=barcode').val('');
+	$('#inventory-add-modal').modal('toggle');
+	return false;
+}
 //BUTTON ACTIONS
 function addInventory(event){
 	//Set the values to update
-	var $form = $("#inventory-form");
+	var $form = $("#inventory-add-form");
 	var json = toJson($form);
 	var url = getInventoryUrl();
 
@@ -20,6 +26,7 @@ function addInventory(event){
        },	   
 	   success: function(response) {
 	        handleSuccessMessage("Inventory added successfully");
+	        inventoryFormToggle();
 	   		getInventoryList();  
 	   },
 	   error: handleAjaxError
@@ -29,7 +36,6 @@ function addInventory(event){
 }
 
 function updateInventory(event){
-	$('#edit-inventory-modal').modal('toggle');
 	//Get the ID
 	var id = $("#inventory-edit-form input[name=id]").val();
 	var url = getInventoryUrl() + "/" + id;
@@ -46,7 +52,8 @@ function updateInventory(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
-	    handleSuccessMessage("Inventory updated");
+	        handleSuccessMessage("Inventory updated successfully");
+	        $('#edit-inventory-modal').modal('toggle');
 	   		getInventoryList();   
 	   },
 	   error: handleAjaxError
@@ -121,7 +128,7 @@ function uploadRows(){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
-	    handleSuccessMessage("Inventories added successfully");
+	    handleSuccessMessage("Inventory added successfully");
 	   		uploadRows();  
 	   },
 	   error: function(response){
@@ -144,16 +151,16 @@ function displayInventoryList(data){
 	$tbody.empty();
 	for(var i in data){
 		var e = data[i];
-		var buttonHtml = '<button onclick="deleteInventory(' + e.id + ')">delete</button>'
-		buttonHtml += ' <button onclick="displayEditInventory(' + e.id + ')">edit</button>'
+		var buttonHtml = ' <button onclick="displayEditInventory(' + e.id + ')" class="btn btn-dark custom-button edit-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
 		var row = '<tr>'
-		+ '<td>' + e.id + '</td>'
+		+ '<th scope="row">' + e.id + '</th>'
 		+ '<td>' + e.barcode + '</td>'
 		+ '<td>'  + e.quantity + '</td>'
-		+ '<td>' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + buttonHtml + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
+	setRole();
 }
 
 function displayEditInventory(id){
@@ -204,10 +211,17 @@ function displayInventory(data){
 	$("#inventory-edit-form input[name=id]").val(data.id);
 	$('#edit-inventory-modal').modal('toggle');
 }
-
+function setRole(){
+if(getRole() === 'operator'){
+    $('#add-form').prop("disabled", true)
+    $('#upload-data').prop("disabled", true)
+    $(".edit-button").prop("disabled", true);
+}
+}
 
 //INITIALIZATION CODE
 function init(){
+    $('#add-form').click(inventoryFormToggle);
 	$('#add-inventory').click(addInventory);
 	$('#update-inventory').click(updateInventory);
 	$('#refresh-data').click(getInventoryList);
@@ -219,4 +233,5 @@ function init(){
 
 $(document).ready(init);
 $(document).ready(getInventoryList);
+$(document).ready(setRole);
 

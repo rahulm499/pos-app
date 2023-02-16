@@ -38,7 +38,6 @@ function generateReport(event){
 	var $form = $("#inventory-report-form");
 	var json = toJson($form);
 	var url = getInventoryReportUrl();
-    console.log(json)
 	$.ajax({
 	   url: url,
 	   type: 'POST',
@@ -78,7 +77,7 @@ function displayInventoryList(data){
 		var e = data[i];
 		index+=1
 		var row = '<tr>'
-		+ '<td>' + index + '</td>'
+		+ '<th scope="row">' + index + '</th>'
 		+ '<td>' + e.brand + '</td>'
 		+ '<td>'  + e.category + '</td>'
 		+ '<td>'  + e.quantity + '</td>'

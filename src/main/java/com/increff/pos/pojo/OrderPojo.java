@@ -11,6 +11,13 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
+@Table(name="Orders",
+        indexes = { @Index(name = "id", columnList = "id"),
+                @Index(name = "created_at", columnList = "created_at"),
+                @Index(name = "isInvoiceGenerated", columnList = "isInvoiceGenerated")
+        }
+
+)
 public class OrderPojo {
     @Id
     @GeneratedValue(generator = "sequence-generator")

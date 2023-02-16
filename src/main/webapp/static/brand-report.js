@@ -79,7 +79,7 @@ function displayBrandReportList(data){
 		console.log("DISPLAY",e)
         index += 1;
 		var row = '<tr>'
-		+ '<td>' + index + '</td>'
+		+ '<th scope="row">' + index + '</th>'
 		+ '<td>' + e.brand + '</td>'
 		+ '<td>'  + e.category + '</td>'
 		+ '</tr>';

@@ -58,6 +58,10 @@ public class InvoiceFlow {
         fileOutputStream.write(decodedBytes);
         fileOutputStream.close();
     }
+    @Transactional(rollbackOn = ApiException.class)
+    public void setOrderStatus(Integer id) throws ApiException {
+        orderFlow.updateInvoiceStatus(id);
+    }
 
     protected InvoiceData convertInvoiceDataList(List<OrderItemData> orderItemDataList, OrderPojo orderPojo) throws ApiException {
         List<InvoiceItemData> invoiceItemDataList = new ArrayList<>();

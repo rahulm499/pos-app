@@ -34,6 +34,7 @@ public class InvoiceDto {
         InvoiceData invoiceData = invoiceFlow.generateInvoiceData(id);
         String pdfStream = invoiceFlow.generateInvoice(invoiceData);
         invoiceFlow.storeInvoice(pdfStream, id);
+        invoiceFlow.setOrderStatus(id);
         return pdfStream;
     }
 

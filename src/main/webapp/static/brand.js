@@ -3,6 +3,7 @@ function getBrandUrl(){
 	var baseUrl = $("meta[name=baseUrl]").attr("content")
 	return baseUrl + "/api/brand";
 }
+
 function brandFormToggle(event){
 	//Set the values to update
 	$('#brand-add-form input[name=brand').val('');
@@ -26,7 +27,7 @@ function addBrand(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
-	        handleSuccessMessage("Brand and category added successfully");
+	        handleSuccessMessage("Brand added successfully");
 	        brandFormToggle();
 	   		getBrandList();
 	   },
@@ -45,7 +46,7 @@ function updateBrand(event){
 	//Set the values to update
 	var $form = $("#brand-edit-form");
 	var json = toJson($form);
-
+    delete json.id;
 	$.ajax({
 	   url: url,
 	   type: 'PUT',
@@ -54,8 +55,10 @@ function updateBrand(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
+	         handleSuccessMessage("Brand updated successfully");
 	        $('#edit-brand-modal').modal('toggle');
-	   		getBrandList();   
+	   		getBrandList();
+
 	   },
 	   error: handleAjaxError
 	});
@@ -129,7 +132,7 @@ function uploadRows(){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(response) {
-	         handleSuccessMessage("Brands added successfully");
+	         handleSuccessMessage("Brand added successfully");
 	   		uploadRows();  
 	   },
 	   error: function(response){
@@ -152,15 +155,16 @@ function displayBrandList(data){
 	$tbody.empty();
 	for(var i in data){
 		var e = data[i];
-		var buttonHtml = '<button onclick="displayEditBrand(' + e.id + ')" class="btn btn-dark">Edit</button>'
+		var buttonHtml = '<button onclick="displayEditBrand(' + e.id + ')" class="btn btn-dark custom-button edit-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
 		var row = '<tr>'
-		+ '<td>' + e.id + '</td>'
+		+ '<th scope="row">' + e.id + '</th>'
 		+ '<td>' + e.brand + '</td>'
 		+ '<td>'  + e.category + '</td>'
-		+ '<td>' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + buttonHtml + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
+	setRole()
 }
 
 function displayEditBrand(id){
@@ -211,7 +215,13 @@ function displayBrand(data){
 	$("#brand-edit-form input[name=id]").val(data.id);
 	$('#edit-brand-modal').modal('toggle');
 }
-
+function setRole(){
+if(getRole() === 'operator'){
+    $('#add-form').prop("disabled", true)
+    $('#upload-data').prop("disabled", true)
+    $(".edit-button").prop("disabled", true);
+}
+}
 
 //INITIALIZATION CODE
 function init(){
@@ -227,4 +237,5 @@ $('#add-form').click(brandFormToggle);
 
 $(document).ready(init);
 $(document).ready(getBrandList);
+$(document).ready(setRole)
 

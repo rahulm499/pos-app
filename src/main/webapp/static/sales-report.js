@@ -86,7 +86,7 @@ function displaySalesList(data){
 		var e = data[i];
 		index+=1
 		var row = '<tr>'
-		+ '<td>' + index + '</td>'
+		+ '<th scope="row">' + index + '</th>'
 		+ '<td>' + e.brand + '</td>'
 		+ '<td>'  + e.category + '</td>'
 		+ '<td>'  + e.quantity + '</td>'

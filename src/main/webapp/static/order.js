@@ -72,12 +72,12 @@ function cartItemList(data){
 
 		var e = data[i];
 		console.log(e);
-		var buttonHtml = '<button onclick="editCartItem('+ i+')">Edit</button>'
+		var buttonHtml = '<button onclick="editCartItem('+ i+')" class="btn btn-dark custom-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
 		var row = '<tr>'
 		+ '<td>' + e.barcode + '</td>'
 		+ '<td>' + e.quantity + '</td>'
 		+ '<td>' + e.sellingPrice + '</td>'
-		+ '<td>' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + buttonHtml + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
@@ -175,13 +175,21 @@ function displayOrderList(data){
 	$tbody.empty();
 	for(var i in data){
 		var e = data[i];
-		var buttonHtml = '<button onclick="viewOrder(' + e.id + ')">View Order</button>'
-		buttonHtml +=  '<button onclick="generateInvoice(' + e.id + ')">Generate Invoice</button>'
-		buttonHtml +=  '<button onclick="downloadInvoice(' + e.id + ')">Download Invoice</button>'
+		var buttonHtml = '<div class="d-flex flex-row justify-content-center">'
+		buttonHtml += '<button onclick="viewOrder(' + e.id + ')" class="btn btn-dark custom-button mr-2"><i class="material-icons">visibility</i>View</button>'
+		if(!e.isInvoiceGenerated){
+		buttonHtml += '<button onclick="viewOrder(' + e.id + ')" class="btn btn-dark custom-button"><i class="material-icons">edit</i>Edit</button>'
+		var invoice  =  '<button onclick="generateInvoice(' + e.id + ')" class="btn btn-dark custom-button mx-auto"><i class="material-icons">description</i>Generate Invoice</button>'}
+		else{
+		buttonHtml += '<button onclick="viewOrder(' + e.id + ')" class="btn btn-dark custom-button" disabled><i class="material-icons">edit</i>Edit</button>'
+		var invoice  =  '<button onclick="downloadInvoice(' + e.id + ')" class="btn btn-dark custom-button mx-auto"><i class="material-icons">file_download</i>Download Invoice</button>'
+		}
+		buttonHtml+='</div>'
 		var row = '<tr>'
-		+ '<td>' + e.id + '</td>'
+		+ '<th scope="row">' + e.id + '</th>'
 		+ '<td>' + convertDateTime(e.dateTime) + '</td>'
-		+ '<td>' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + buttonHtml + '</td>'
+		+ '<td class="text-center">' + invoice + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
