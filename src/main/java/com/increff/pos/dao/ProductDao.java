@@ -32,12 +32,12 @@ public class ProductDao  extends AbstractDao{
         query.setParameter("id", id);
         return getSingle(query);
     }
-    public ProductPojo selectBarcode(String barcode) {
+    public ProductPojo selectByBarcode(String barcode) {
         TypedQuery<ProductPojo> query = getQuery(select_barcode, ProductPojo.class);
         query.setParameter("barcode", barcode);
         return getSingle(query);
     }
-    public List<ProductPojo> selectBrandCategory(Integer brand_category) {
+    public List<ProductPojo> selectByBrandCategory(Integer brand_category) {
         TypedQuery<ProductPojo> query = getQuery(select_brand_category, ProductPojo.class);
         query.setParameter("brand_category", brand_category);
         return query.getResultList();
@@ -47,8 +47,6 @@ public class ProductDao  extends AbstractDao{
         return query.getResultList();
     }
 
-    public void update(ProductPojo p) {
-    }
 
 
 }

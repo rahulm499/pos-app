@@ -1,5 +1,7 @@
 package com.increff.pos.dto;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.increff.pos.flow.ReportsFlow;
 import com.increff.pos.model.data.DailyReportData;
 import com.increff.pos.model.data.SalesReportData;
@@ -9,44 +11,54 @@ import com.increff.pos.model.data.InventoryReportData;
 import com.increff.pos.model.form.SalesReportForm;
 import com.increff.pos.pojo.*;
 import com.increff.pos.service.*;
-import com.increff.pos.util.StringUtil;
 import com.increff.pos.util.helper.ReportsHelperUtil;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Component
+@Service
 public class ReportsDto {
     @Autowired
-    private BrandService brandService;
+    private BrandApiService brandApiService;
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryApiService inventoryApiService;
     @Autowired
-    private OrderService orderService;
+    private OrderApiService orderApiService;
     @Autowired
-    private OrderItemService orderItemService;
+    private OrderItemApiService orderItemApiService;
     @Autowired
-    private DailyReportService dailyReportService;
+    private DailyReportApiService dailyReportApiService;
     @Autowired
     private ReportsFlow reportsFlow;
-    public List<BrandReportData> getBrandReport(BrandForm form) throws ApiException {
-        return covertBrandReport(reportsFlow.getBrandReport(form));
+    public List<BrandReportData> generateBrandReport(BrandForm form) throws ApiException {
+        return covertBrandReport(reportsFlow.generateBrandReport(form));
     }
 
-    public List<InventoryReportData> getInventoryReport(BrandForm form) throws ApiException {
-        List<BrandReportData> brandReportDataList = getBrandReport(form);
-        return reportsFlow.getInventoryReport(brandReportDataList);
+    public ResponseEntity<byte[]> downloadBrandReport(String data) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<BrandReportData> brandReportDataList = objectMapper.readValue(data, new TypeReference<List<BrandReportData>>() {});
+        return reportsFlow.downloadBrandReport(brandReportDataList);
+    }
+
+    public List<InventoryReportData> generateInventoryReport(BrandForm form) throws ApiException {
+        List<BrandReportData> brandReportDataList = generateBrandReport(form);
+        return reportsFlow.generateInventoryReport(brandReportDataList);
+    }
+
+    public ResponseEntity<byte[]> downloadInventoryReport(String data) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<InventoryReportData> inventoryReportDataList = objectMapper.readValue(data, new TypeReference<List<InventoryReportData>>() {});
+        return reportsFlow.downloadInventoryReport(inventoryReportDataList);
     }
 
     public List<SalesReportData> getSalesReport(SalesReportForm form) throws ApiException {
@@ -54,12 +66,17 @@ public class ReportsDto {
         validateSalesReport(form);
         List<OrderPojo> orderPojoList = reportsFlow.getSalesReportOrderList(form);
         HashMap<Integer, Pair<Integer, Double>> map= reportsFlow.getSalesReportProductList(orderPojoList);;
-        List<BrandReportData> brandReportDataList = getBrandReport(form);
+        List<BrandReportData> brandReportDataList = generateBrandReport(form);
         return reportsFlow.getSalesReportData(brandReportDataList, map);
 
     }
+    public ResponseEntity<byte[]> downloadSalesReport(String data) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<SalesReportData> salesReportDataList = objectMapper.readValue(data, new TypeReference<List<SalesReportData>>() {});
+        return reportsFlow.downloadSalesReport(salesReportDataList);
+    }
     public List<DailyReportData> getDailyReport(){
-        List<DailyReportPojo> dailyPojoList = dailyReportService.getAll();
+        List<DailyReportPojo> dailyPojoList = dailyReportApiService.getAll();
         List<DailyReportData> data = new ArrayList<>();
         for(DailyReportPojo dailyReportPojo: dailyPojoList){
             data.add(ReportsHelperUtil.convertDailyReport(dailyReportPojo));
@@ -67,20 +84,24 @@ public class ReportsDto {
         return data;
     }
 
+    public ResponseEntity<byte[]> downloadDailyReport() throws IOException {
+        return reportsFlow.downloadDailyReport(getDailyReport());
+    }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void generateDailyReport() throws ApiException {
         List<OrderPojo> orderPojoList = reportsFlow.getDailyReportOrderList();
         int invoiced_items_count=0;
         double revenue=0;
         for(OrderPojo orderPojo: orderPojoList){
-            List<OrderItemPojo> orderItems = orderItemService.getByOrderId(orderPojo.getId());
+            List<OrderItemPojo> orderItems = orderItemApiService.getByOrderId(orderPojo.getId());
             for(OrderItemPojo orderItemPojo: orderItems){
                 invoiced_items_count+=orderItemPojo.getQuantity();
                 revenue+=orderItemPojo.getSellingPrice();
             }
         }
         DailyReportPojo dailyReportPojo = convertDailyReport(orderPojoList.size(), invoiced_items_count, revenue);
-        dailyReportService.add(dailyReportPojo);
+        dailyReportApiService.add(dailyReportPojo);
     }
 
     protected void validateSalesReport(SalesReportForm form) throws ApiException {

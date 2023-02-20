@@ -41,6 +41,7 @@ function setMinEndDate(event){
      const dateInput = document.getElementById("start-date");
      dateInput.setAttribute("max", event.target.value);
   }
+ var reportData =[]
 function generateReport(event){
 	//Set the values to update
 	var $form = $("#sales-report-form");
@@ -55,7 +56,37 @@ function generateReport(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(data) {
+	        reportData = data
 	   		displaySalesList(data);
+	   },
+	   error: handleAjaxError
+	});
+
+	return false;
+}
+
+
+function downloadReport(event){
+	//Set the values to update
+	var json = JSON.stringify(reportData);
+	var url = getSalesReportUrl() +'/download' ;
+	$.ajax({
+	   url: url,
+	   type: 'POST',
+	   data: json,
+	   headers: {
+       	'Content-Type': 'application/json'
+       },
+	   success: function(data) {
+                var a = document.createElement('a');
+                var blob = new Blob([data], {type: "text/plain"});
+                var url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = 'data.csv';
+                document.body.append(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 	   },
 	   error: handleAjaxError
 	});
@@ -101,6 +132,7 @@ function init(){
     $("#report").hide()
 	$('#generate-report').click(generateReport);
 	$('#start-date').change(setMinEndDate);
+	$('#download-report').click(downloadReport);
 }
 
 $(document).ready(init);

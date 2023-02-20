@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
-public class OrderService {
+public class OrderApiService {
     @Autowired
     private OrderDao dao;
 
@@ -39,7 +39,6 @@ public class OrderService {
     public void update(Integer id) throws ApiException {
         OrderPojo ex = getCheck(id);
         ex.setIsInvoiceGenerated(Boolean.TRUE);
-        dao.update(ex);
     }
 
     @Transactional
@@ -54,14 +53,6 @@ public class OrderService {
     public List<OrderPojo> getOrderByDate(ZonedDateTime startDate, ZonedDateTime endDate) throws ApiException {
         List<OrderPojo> p = dao.selectByDate(startDate, endDate);
         return p;
-    }
-
-    //NORMALIZE NEEDS TO BE UPDATED
-    protected static void normalize(OrderPojo p) {
-
-    }
-    protected void validate(OrderPojo p) throws ApiException{
-
     }
 
 }

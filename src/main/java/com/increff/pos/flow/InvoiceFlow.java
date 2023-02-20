@@ -7,17 +7,17 @@ import com.increff.pos.model.data.InvoiceItemData;
 import com.increff.pos.model.data.OrderItemData;
 import com.increff.pos.pojo.OrderPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.OrderService;
-import com.increff.pos.service.ProductService;
+import com.increff.pos.service.OrderApiService;
+import com.increff.pos.service.ProductApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import javax.transaction.Transactional;
-import java.io.FileNotFoundException;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,17 +25,17 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-@Component
+@Service
 public class InvoiceFlow {
     @Autowired
     private OrderFlow orderFlow;
 
     @Autowired
-    private OrderService orderService;
+    private OrderApiService orderApiService;
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
     public InvoiceData generateInvoiceData(Integer id) throws ApiException {
-        return convertInvoiceDataList(orderFlow.getOrderItems(id), orderService.get(id));
+        return convertInvoiceDataList(orderFlow.getOrderItems(id), orderApiService.get(id));
     }
 
     public String generateInvoice(InvoiceData invoiceData) throws JsonProcessingException {
@@ -50,7 +50,7 @@ public class InvoiceFlow {
         return response;
     }
 
-    @Transactional(rollbackOn = IOException.class)
+    @Transactional(rollbackFor = IOException.class)
     public void storeInvoice(String pdfStream, Integer id) throws IOException {
         String filePath = "src/main/resources/apache\\order_"+id+".pdf";
         byte[] decodedBytes = Base64.getDecoder().decode(pdfStream);
@@ -58,7 +58,7 @@ public class InvoiceFlow {
         fileOutputStream.write(decodedBytes);
         fileOutputStream.close();
     }
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void setOrderStatus(Integer id) throws ApiException {
         orderFlow.updateInvoiceStatus(id);
     }
@@ -68,7 +68,7 @@ public class InvoiceFlow {
         int index=1;
         Double total=0.00;
         for(OrderItemData orderItemData: orderItemDataList){
-            InvoiceItemData invoiceItemData=convertInvoiceData(orderItemData, productService.getCheckBarcode(orderItemData.getBarcode()).getName(), index);
+            InvoiceItemData invoiceItemData=convertInvoiceData(orderItemData, productApiService.getCheckBarcode(orderItemData.getBarcode()).getName(), index);
             total+=invoiceItemData.getAmount();
             invoiceItemDataList.add(invoiceItemData);
         }

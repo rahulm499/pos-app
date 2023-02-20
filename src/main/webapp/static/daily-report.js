@@ -36,6 +36,34 @@ function generateReport(event){
 	return false;
 }
 
+
+function downloadReport(event){
+	//Set the values to update
+	var url = getDailyReportUrl() +'/download' ;
+	$.ajax({
+	   url: url,
+	   type: 'POST',
+	   data: {},
+	   headers: {
+       	'Content-Type': 'application/json'
+       },
+	   success: function(data) {
+                var a = document.createElement('a');
+                var blob = new Blob([data], {type: "text/plain"});
+                var url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = 'data.csv';
+                document.body.append(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+	   },
+	   error: handleAjaxError
+	});
+
+	return false;
+}
+
 function convertDateTime(dateTime){
 console.log(dateTime);
 dateTime = dateTime.split('[')[0]
@@ -70,7 +98,7 @@ function displayDailyList(data){
 //INITIALIZATION CODE
 function init(){
 	$('#generate-report').click(generateReport);
-	$('#refresh-report').click(getReport);
+	$('#download-report').click(downloadReport);
 }
 
 $(document).ready(init);

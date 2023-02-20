@@ -7,11 +7,11 @@ function getProductUrl(){
 //BUTTON ACTIONS
 function productFormToggle(event){
 	//Set the values to update
-	$('#product-add-form input[name=name').val('');
-    $('#product-add-form input[name=barcode').val('');
-    $('#product-add-form input[name=brand_category').val('');
-    $('#product-add-form input[name=brand_name').val('');
-    $('#product-add-form input[name=mrp').val('');
+	$('#product-add-form input[name=name]').val('');
+    $('#product-add-form input[name=barcode]').val('');
+    $('#product-add-form input[name=brand_category]').val('');
+    $('#product-add-form input[name=brand_name]').val('');
+    $('#product-add-form input[name=mrp]').val('');
 	$('#product-add-modal').modal('toggle');
 	return false;
 }

@@ -9,6 +9,8 @@ function getBrandUrl(){
 }
 const brandSet = new Set()
 const categorySet = new Set()
+
+var reportData =[]
 function getBrandList(){
     var url = getBrandUrl();
     $.ajax({
@@ -47,7 +49,36 @@ function generateReport(event){
        	'Content-Type': 'application/json'
        },	   
 	   success: function(data) {
+	        reportData = data;
 	   		displayBrandReportList(data);
+	   },
+	   error: handleAjaxError
+	});
+
+	return false;
+}
+
+function downloadReport(event){
+	//Set the values to update
+	var json = JSON.stringify(reportData);
+	var url = getBrandReportUrl() +'/download' ;
+	$.ajax({
+	   url: url,
+	   type: 'POST',
+	   data: json,
+	   headers: {
+       	'Content-Type': 'application/json'
+       },
+	   success: function(data) {
+                var a = document.createElement('a');
+                var blob = new Blob([data], {type: "text/plain"});
+                var url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = 'data.csv';
+                document.body.append(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 	   },
 	   error: handleAjaxError
 	});
@@ -91,6 +122,7 @@ function displayBrandReportList(data){
 function init(){
     $("#report").hide()
 	$('#generate-report').click(generateReport);
+	$('#download-report').click(downloadReport);
 }
 
 $(document).ready(init);

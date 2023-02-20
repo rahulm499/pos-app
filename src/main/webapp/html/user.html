@@ -8,40 +8,121 @@
 
 <nav th:replace="snippets.html :: name_app_navbar"></nav>
 
-<div class="container">
+<div class="container mt-5 col-9">
 
-<h3>Admin > Users</h3>
+	<h1>Admin > User</h1>
 
+	<div class="row">
+		&nbsp;
+	</div>
  <!-- Top row with form-->
- <div class="row">
-	 <div class="col-12">
+	<div class="row">
+		<div class="col-12">
 			<form class="form-inline" id="user-form">
-			  <div class="form-group">
-			    <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" name="email" id="inputEmail" placeholder="enter email">
-			    </div>
-			  </div>
-			  <div class="form-group">
-			    <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" name="password" id="inputPassword" placeholder="enter password">
-			    </div>
-			  </div>
-			  <div class="form-group">
-			    <label for="inputRole" class="col-sm-2 col-form-label">Role</label>
-			    <div class="col-sm-10">
-			      <input type="text" class="form-control" name="role" id="inputRole" placeholder="enter role">
-			    </div>
-			  </div>
-			  <button type="button" class="btn btn-primary" id="add-user">Add</button>
-			  &nbsp;
-			  <button type="button" class="btn btn-primary" id="refresh-data">Refresh</button>
+				<button type="button" class="btn btn-dark custom-button" id="add-form"><i class="material-icons">add</i> Add User</button>
 			</form>
-	 </div>	
-</div> 
+		</div>
+	</div>
+	<div class="modal fade" id="user-add-modal" tabindex="-1" role="dialog" >
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Add User</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="user-add-form">
+						<div class="form-group">
+							<label for="inputEmail">Email</label>
+							<div>
+								<input type="text" class="form-control" name="email" id="inputEmail" placeholder="enter email">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputPassword">Password</label>
+							<div>
+								<input type="text" class="form-control" name="password" id="inputPassword" placeholder="enter password">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputRole">Role</label>
+							<div>
+								<select name="role" id="inputRole" class="form-control">
+									<option value="supervisor">Supervisor</option>
+									<option value="operator">Operator</option>
+								</select>
+							</div>
+						</div>
+						&nbsp;</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-dark" id="add-user">Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-
+	<div class="modal fade" id="user-edit-modal" tabindex="-1" role="dialog" >
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Edit User</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="user-edit-form">
+						<div class="form-group">
+							<label for="editEmail">Email</label>
+							<div>
+								<input readonly type="text" class="form-control" name="email" id="editEmail" placeholder="Enter email">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="editRole">Role</label>
+							<div>
+								<select name="role" id="editRole" class="form-control">
+									<option value="supervisor">Supervisor</option>
+									<option value="operator">Operator</option>
+								</select>
+							</div>
+						</div>
+						<input hidden type="text" class="form-control" name="id">
+						&nbsp;</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-dark" id="edit-user">Update</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="user-delete-modal" tabindex="-1" role="dialog" >
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Delete User</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="user-delete-form">
+						<i>Are you sure, you want to delete the user ?</i>
+						<input hidden type="text" class="form-control" name="id">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-dark" id="delete-user">Delete</button>
+				</div>
+			</div>
+		</div>
+	</div>
 <!-- Blank Row -->
 <div class="row">
 	&nbsp;
@@ -56,28 +137,11 @@
 	      <th scope="col">ID</th>
 	      <th scope="col">Email</th>
 	      <th scope="col">Role</th>
-	      <th scope="col">Actions</th>
+	      <th scope="col" class="text-center">Actions</th>
 	    </tr>
 	  </thead>
 	  <tbody>
-	    <tr>
-	      <td>1</td>
-	      <td>Romil Jain</td>
-	      <td>role1</td>
-	      <td>Edit | Delete</td>
-	    </tr>
-	    <tr>
-	      <td>2</td>
-	      <td>Rajul Jain</td>
-	      <td>role2</td>
-	      <td>Edit | Delete</td>
-	    </tr>
-	    <tr>
-	      <td>3</td>
-	      <td>Anaisha Jain</td>
-	      <td>role3</td>
-	      <td>Edit | Delete</td>
-	    </tr>
+
 	  </tbody>
 	</table>
 

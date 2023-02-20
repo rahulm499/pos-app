@@ -21,24 +21,52 @@ function orderFormToggle(event){
 	cartItemList(orderData)
 	return false;
 }
-
+function findOrderItem(data){
+     console.log(data);
+    for(var i in orderData){
+        if(data.barcode == orderData[i].barcode){
+            return i;
+        }
+    }
+    return -1;
+}
 function addOrder(event){
 	var $form = $("#order-cart-form");
 	var json = toJson($form);
 	var url = getOrderItemUrl();
-	$('#order-cart-form input[name=barcode').val('');
-	$('#order-cart-form input[name=quantity').val('');
-	$('#order-cart-form input[name=sellingPrice').val('');
+	var jsonParseData = JSON.parse(json);
+	jsonParseData.barcode = jsonParseData.barcode.toLowerCase()
+	var index = findOrderItem(jsonParseData);
+	if(index != -1){
+	    if( Number(jsonParseData.sellingPrice) !=  Number(orderData[index].sellingPrice)){
+	        handleErrorMsg("Selling Price cannot be different for same item");
+	        return false;
+	    }else{
+	        jsonParseData.quantity = String(Number(jsonParseData.quantity) + Number(orderData[index].quantity))
+	    }
+	}
 	$.ajax({
         	   url: url,
         	   type: 'POST',
-        	   data: json,
+        	   data: JSON.stringify(jsonParseData),
         	   headers: {
                	'Content-Type': 'application/json'
                },
         	   success: function(response) {
-        	         handleSuccessMessage("Order item added");
-        	        orderData.push(JSON.parse(json));
+                    $('#order-cart-form input[name=barcode').val('');
+                    $('#order-cart-form input[name=quantity').val('');
+                    $('#order-cart-form input[name=sellingPrice').val('');
+        	        handleSuccessMessage("Order item added");
+        	        tempOrderData=[]
+                         for(var i in orderData){
+                            if(i==index){
+                            continue
+                            }else{
+                            tempOrderData.push(orderData[i]);
+                            }
+                         }
+                         orderData = tempOrderData
+        	        orderData.push(jsonParseData);
                     cartItemList(orderData);
         	   },
         	   error: handleAjaxError
@@ -48,21 +76,48 @@ function addOrder(event){
 }
 function editCartItem(index){
     data = orderData[index]
-    $('#order-cart-form input[name=barcode').val(data.barcode);
-     $('#order-cart-form input[name=quantity').val(data.quantity);
-     $('#order-cart-form input[name=sellingPrice').val(data.sellingPrice);
-     tempOrderData=[]
-     for(var i in orderData){
-        if(i==index){
-        continue
-        }else{
-        tempOrderData.push(orderData[i]);
-        }
-     }
-     orderData = tempOrderData
-    cartItemList(orderData)
-    return false;
+    $('#order-item-edit-form input[name=barcode]').val(data.barcode);
+     $('#order-item-edit-form input[name=quantity]').val(data.quantity);
+     $('#order-item-edit-form input[name=sellingPrice]').val(data.sellingPrice);
+     $('#order-item-edit-form input[name=index]').val(index);
+     $("#order-item-edit-modal").modal('toggle');
+      var $form = $("#order-item-edit-form");
+         console.log($form)
+//     $("#order-cart-modal").modal('toggle');
+     console.log("hello2")
+}
 
+function updateOrderItem(){
+    console.log("hello")
+    var $form = $("#order-item-edit-form");
+    console.log($form)
+    var index = $('#order-item-edit-form input[name=index]').val();
+    	var json = toJson($form);
+    	var url = getOrderItemUrl();
+    	var jsonParseData = JSON.parse(json);
+    	console.log(jsonParseData)
+    	$.ajax({
+            	   url: url,
+            	   type: 'POST',
+            	   data: json,
+            	   headers: {
+                   	'Content-Type': 'application/json'
+                   },
+            	   success: function(response) {
+                        $('#order-item-edit-form input[name=barcode]').val('');
+                            $('#order-item-edit-form input[name=quantity]').val('');
+                            $('#order-item-edit-form input[name=sellingPrice]').val('');
+                            $('#order-item-edit-form input[name=index]').val('');
+                            $("#order-item-edit-modal").modal('toggle');
+//                            $("#order-cart-modal").modal('toggle');
+            	        handleSuccessMessage("Order item updated");
+            	        orderData[index] = jsonParseData;
+                        cartItemList(orderData);
+            	   },
+            	   error: handleAjaxError
+            	});
+
+        return false;
 }
 function cartItemList(data){
 	var $tbody = $('#order-item-table').find('tbody');
@@ -72,7 +127,7 @@ function cartItemList(data){
 
 		var e = data[i];
 		console.log(e);
-		var buttonHtml = '<button onclick="editCartItem('+ i+')" class="btn btn-dark custom-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
+		var buttonHtml = '<button onclick="editCartItem('+ i +')" class="btn btn-dark custom-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
 		var row = '<tr>'
 		+ '<td>' + e.barcode + '</td>'
 		+ '<td>' + e.quantity + '</td>'
@@ -243,12 +298,9 @@ function init(){
     $('#create-order-item').click(orderFormToggle);
 	$('#add-order').click(addOrder);
 	$('#place-order').click(placeOrder);
-	$('#update-order').click(updateOrder);
-	$('#refresh-data').click(getOrderList);
-	$('#upload-data').click(displayUploadData);
-	$('#process-data').click(processData);
-	$('#download-errors').click(downloadErrors);
-    $('#orderFile').on('change', updateFileName)
+//	$('#update-order').click(updateOrder);
+//	$('#refresh-data').click(getOrderList);
+    $('#update-order-item').click(updateOrderItem);
 }
 
 $(document).ready(init);

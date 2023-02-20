@@ -1,79 +1,76 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.model.data.OrderItemData;
-import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
-import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.*;
 import com.increff.pos.util.helper.OrderHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-
-import javax.transaction.Transactional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class OrderFlow {
     @Autowired
-    private OrderItemService orderItemService;
+    private OrderItemApiService orderItemApiService;
     @Autowired
-    private OrderService orderService;
+    private OrderApiService orderApiService;
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryApiService inventoryApiService;
 
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public List<OrderItemPojo> convertOrderItem(List<OrderItemForm> orderItemFormList) throws ApiException {
         List<OrderItemPojo> orderItemPojos = new ArrayList<>();
         for (OrderItemForm orderItemForm : orderItemFormList) {
             OrderItemPojo b = OrderHelperUtil.convertOrderItem(orderItemForm);
-            b.setProductId(productService.getCheckBarcode(orderItemForm.getBarcode()).getId());
+            b.setProductId(productApiService.getCheckBarcode(orderItemForm.getBarcode()).getId());
             validate(b);
             orderItemPojos.add(b);
         }
         return orderItemPojos;
     }
 
-    @Transactional(rollbackOn = ApiException.class)
-    public void add(List<OrderItemPojo> orderItemPojoList, Integer orderId) throws ApiException {
+    @Transactional(rollbackFor = ApiException.class)
+    public void add(List<OrderItemPojo> orderItemPojoList, OrderPojo orderPojo) throws ApiException {
+        orderApiService.add(orderPojo);
         for (OrderItemPojo orderItemPojo : orderItemPojoList) {
-            orderItemPojo.setOrderId(orderId);
-            orderItemService.add(orderItemPojo);
-            InventoryPojo inventoryPojo = inventoryService.getByProduct(orderItemPojo.getProductId());
+            orderItemPojo.setOrderId(orderPojo.getId());
+            orderItemApiService.add(orderItemPojo);
+            InventoryPojo inventoryPojo = inventoryApiService.getByProduct(orderItemPojo.getProductId());
             inventoryPojo.setQuantity(inventoryPojo.getQuantity() - orderItemPojo.getQuantity());
-            inventoryService.update(inventoryPojo.getId(), inventoryPojo);
+            inventoryApiService.update(inventoryPojo.getId(), inventoryPojo);
         }
     }
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void delete(Integer id) throws ApiException {
-        List<OrderItemPojo> orderItemPojoList =orderItemService.getByOrderId(id);
+        List<OrderItemPojo> orderItemPojoList = orderItemApiService.getByOrderId(id);
         for (OrderItemPojo orderItemPojo : orderItemPojoList){
-            orderItemService.delete(orderItemPojo.getId());
+            orderItemApiService.delete(orderItemPojo.getId());
         }
-        orderService.delete(id);
+        orderApiService.delete(id);
     }
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void updateInvoiceStatus(Integer id) throws ApiException {
-        orderService.update(id);
+        orderApiService.update(id);
     }
 
 
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public List<OrderItemData> getOrderItems(Integer id) throws ApiException {
-        List<OrderItemPojo> orderItemPojoList = orderItemService.getByOrderId(id);
+        List<OrderItemPojo> orderItemPojoList = orderItemApiService.getByOrderId(id);
         List<OrderItemData> orderItemDataList = new ArrayList<>();
         for(OrderItemPojo orderItemPojo: orderItemPojoList){
             OrderItemData orderItemData = OrderHelperUtil.convertOrderItem(orderItemPojo);
-            orderItemData.setBarcode(productService.getCheck(orderItemPojo.getProductId()).getBarcode());
+            orderItemData.setBarcode(productApiService.getCheck(orderItemPojo.getProductId()).getBarcode());
             orderItemDataList.add(orderItemData);
         }
         return orderItemDataList;
@@ -81,9 +78,9 @@ public class OrderFlow {
 
 
     public void validate(OrderItemPojo orderItemPojo) throws ApiException {
-        productService.getCheck(orderItemPojo.getProductId());
-        int quantity = inventoryService.getByProduct(orderItemPojo.getProductId()).getQuantity();
-        String exept1 = "Quantity cannot be greater than inventory: "+ quantity;
+        productApiService.getCheck(orderItemPojo.getProductId());
+        int quantity = inventoryApiService.getByProduct(orderItemPojo.getProductId()).getQuantity();
+        String exept1 = "Quantity cannot be greater than existing quantity: "+ quantity;
         if(orderItemPojo.getQuantity() > quantity){
             throw new ApiException(exept1);
         }

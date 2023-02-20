@@ -29,6 +29,7 @@ public class OrderPojo {
     private Integer id;
     @Column(nullable = false)
     private ZonedDateTime created_at;
+    @Column(nullable = false)
     private Boolean isInvoiceGenerated;
 
 

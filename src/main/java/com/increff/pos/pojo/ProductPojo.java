@@ -9,11 +9,8 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name="Product",
-        indexes = { @Index(name = "id", columnList = "id"),
-                @Index(name = "barcode", columnList = "barcode"),
-                @Index(name = "brand_category", columnList = "brand_category"),
-                @Index(name = "name", columnList = "name"),
-                @Index(name = "mrp", columnList = "mrp")}
+        indexes = { @Index(name = "barcode", columnList = "barcode"),
+                @Index(name = "brand_category", columnList = "brand_category")}
 
 )
 public class ProductPojo {

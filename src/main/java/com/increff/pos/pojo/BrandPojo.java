@@ -11,9 +11,9 @@ import javax.persistence.*;
 @Entity
 
 @Table(name="Brand",
-        indexes = { @Index(name = "id", columnList = "id"),
-                @Index(name = "brand", columnList = "brand"),
-                @Index(name = "category", columnList = "category") }
+        indexes = { @Index(columnList = "brand"),
+                    @Index(columnList = "category")},
+        uniqueConstraints ={@UniqueConstraint(columnNames = {"brand", "category"})}
 
 )
 public class BrandPojo {

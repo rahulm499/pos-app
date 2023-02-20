@@ -5,8 +5,8 @@ function getInventoryUrl(){
 }
 function inventoryFormToggle(event){
 	//Set the values to update
-	$('#inventory-add-form input[name=quantity').val('');
-    $('#inventory-add-form input[name=barcode').val('');
+	$('#inventory-add-form input[name=quantity]').val('');
+    $('#inventory-add-form input[name=barcode]').val('');
 	$('#inventory-add-modal').modal('toggle');
 	return false;
 }

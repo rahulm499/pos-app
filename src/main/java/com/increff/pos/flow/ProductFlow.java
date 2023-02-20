@@ -1,45 +1,41 @@
 package com.increff.pos.flow;
 
 import com.increff.pos.model.data.ProductData;
-import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.BrandService;
-import com.increff.pos.service.ProductService;
+import com.increff.pos.service.BrandApiService;
+import com.increff.pos.service.ProductApiService;
 import com.increff.pos.util.helper.ProductHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import javax.transaction.Transactional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
-@Component
+@Service
 public class ProductFlow {
     @Autowired
-    private BrandService brandService;
+    private BrandApiService brandApiService;
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void add(ProductPojo productPojo, String brand, String category) throws ApiException {
         validate(productPojo);
-        BrandPojo brandPojo = brandService.getCheckBrandCategory(brand, category);
-        if(brandPojo == null){
-            throw new ApiException("Brand Category Pair does not exists");
-        }
+        BrandPojo brandPojo = brandApiService.getCheckBrandCategory(brand, category);
         productPojo.setBrand_category(brandPojo.getId());
-        productService.add(productPojo);
+        productApiService.add(productPojo);
     }
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public ProductData get(Integer id) throws ApiException {
-        ProductPojo productPojo = productService.get(id);
-        BrandPojo brandPojo = brandService.get(productPojo.getBrand_category());
+        ProductPojo productPojo = productApiService.get(id);
+        BrandPojo brandPojo = brandApiService.get(productPojo.getBrand_category());
         ProductData data =  ProductHelperUtil.convertProduct(productPojo, brandPojo.getBrand(), brandPojo.getCategory());
         return data;
 
     }
 
     protected void validate(ProductPojo productPojo) throws ApiException{
-        productService.validateBarcode(productPojo.getBarcode());
+        productApiService.validateBarcode(productPojo.getBarcode());
     }
 }

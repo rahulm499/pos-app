@@ -12,7 +12,7 @@ import com.increff.pos.pojo.EmployeePojo;
 import com.increff.pos.util.StringUtil;
 
 @Service
-public class EmployeeService {
+public class EmployeeApiService {
 
 	@Autowired
 	private EmployeeDao dao;

@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-public class InventoryService {
+public class InventoryApiService {
     @Autowired
     private InventoryDao dao;
 

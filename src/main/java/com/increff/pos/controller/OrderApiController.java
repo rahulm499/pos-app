@@ -4,6 +4,7 @@ package com.increff.pos.controller;
 import com.increff.pos.dto.OrderDto;
 import com.increff.pos.model.data.OrderData;
 import com.increff.pos.model.form.OrderForm;
+import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.service.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,6 +44,12 @@ public class OrderApiController {
     @RequestMapping(path = "/api/order", method = RequestMethod.GET)
     public List<OrderData> getAll() throws ApiException {
         return dto.getAll();
+    }
+
+    @ApiOperation(value= "Validates an Order Item")
+    @RequestMapping(path = "/api/order-item", method = RequestMethod.POST)
+    public void validate(@RequestBody OrderItemForm form) throws ApiException {
+        dto.getCheckItem(form);
     }
 
 }

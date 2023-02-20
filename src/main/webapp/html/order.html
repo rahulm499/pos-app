@@ -159,7 +159,45 @@
 			</div>
 		</div>
 	</div>
-
+	<div class="modal fade" id="order-item-edit-modal" tabindex="-2" role="dialog" >
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Edit Item</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="order-item-edit-form">
+						<div class="form-group">
+							<label for="inputBarcode">Barcode</label>
+							<div>
+								<input type="text" class="form-control" required name="barcode" id="inputBrand" placeholder="Barcode" maxlength="100">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputQuantity" >Quantity</label>
+							<div>
+								<input type="number" class="form-control" required name="quantity" id="inputQuantity" placeholder="Quantity" maxlength="100">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="inputPrice" >Selling Price</label>
+							<div>
+								<input type="number" class="form-control" required name="sellingPrice" id="inputPrice" placeholder="Selling Price" maxlength="100">
+							</div>
+						</div>
+						<input type="text" hidden class="form-control" name="index">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-dark" id="update-order-item">Update</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div> <!-- Container end-->
 
 <footer th:replace="snippets.html :: name_footer"></footer>

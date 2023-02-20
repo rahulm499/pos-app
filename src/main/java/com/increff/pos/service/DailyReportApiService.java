@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-public class DailyReportService {
+public class DailyReportApiService {
     @Autowired
     private DailyReportDao dao;
 

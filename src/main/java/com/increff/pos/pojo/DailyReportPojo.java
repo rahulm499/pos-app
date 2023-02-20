@@ -10,11 +10,7 @@ import java.time.ZonedDateTime;
 @Setter
 @Entity
 @Table(name="DailyReport",
-        indexes = { @Index(name = "id", columnList = "id"),
-                @Index(name = "date", columnList = "date"),
-                @Index(name = "invoiced_orders_count", columnList = "invoiced_orders_count"),
-                @Index(name = "invoiced_items_count", columnList = "invoiced_items_count"),
-                @Index(name = "total_revenue", columnList = "total_revenue") }
+        indexes = {}
 
 )
 public class DailyReportPojo {
@@ -22,9 +18,13 @@ public class DailyReportPojo {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private ZonedDateTime date;
+    @Column(nullable = false)
     private Integer invoiced_orders_count;
+    @Column(nullable = false)
     private Integer invoiced_items_count;
+    @Column(nullable = false)
     private Double total_revenue;
 
 

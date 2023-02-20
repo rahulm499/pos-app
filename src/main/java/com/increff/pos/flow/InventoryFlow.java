@@ -5,32 +5,31 @@ import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.InventoryService;
-import com.increff.pos.service.ProductService;
+import com.increff.pos.service.InventoryApiService;
+import com.increff.pos.service.ProductApiService;
 import com.increff.pos.util.helper.InventoryHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
-
-@Component
+@Service
 public class InventoryFlow {
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryApiService inventoryApiService;
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public void add(InventoryForm form) throws ApiException {
-        ProductPojo productPojo = productService.getCheckBarcode(form.getBarcode());
+        ProductPojo productPojo = productApiService.getCheckBarcode(form.getBarcode());
         InventoryPojo inventoryPojo = InventoryHelperUtil.convertInventory(form, productPojo.getId());
-        inventoryService.add(inventoryPojo);
+        inventoryApiService.add(inventoryPojo);
     }
 
-    @Transactional(rollbackOn = ApiException.class)
+    @Transactional(rollbackFor = ApiException.class)
     public InventoryData get(Integer id) throws ApiException {
-        InventoryPojo inventoryPojo = inventoryService.get(id);
-        ProductPojo productPojo = productService.get(inventoryPojo.getProductId());
+        InventoryPojo inventoryPojo = inventoryApiService.get(id);
+        ProductPojo productPojo = productApiService.get(inventoryPojo.getProductId());
         InventoryData data = InventoryHelperUtil.convertInventory(inventoryPojo);
         data.setBarcode(productPojo.getBarcode());
         return data;

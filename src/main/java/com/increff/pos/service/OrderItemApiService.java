@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-public class OrderItemService {
+public class OrderItemApiService {
     @Autowired
     private OrderItemDao dao;
 
@@ -20,12 +20,12 @@ public class OrderItemService {
     }
 
     @Transactional(rollbackOn = ApiException.class)
-    public void delete(int id) {
+    public void delete(Integer id) {
         dao.delete(id);
     }
 
     @Transactional(rollbackOn = ApiException.class)
-    public OrderItemPojo get(int id) throws ApiException {
+    public OrderItemPojo get(Integer id) throws ApiException {
         return getCheck(id);
     }
 
@@ -35,15 +35,14 @@ public class OrderItemService {
     }
 
     @Transactional(rollbackOn  = ApiException.class)
-    public void update(int id, OrderItemPojo p) throws ApiException {
+    public void update(Integer id, OrderItemPojo p) throws ApiException {
         OrderItemPojo ex = getCheck(id);
         ex.setQuantity(p.getQuantity());
         ex.setSellingPrice(p.getSellingPrice());
-        dao.update(ex);
     }
 
     @Transactional
-    public OrderItemPojo getCheck(int id) throws ApiException {
+    public OrderItemPojo getCheck(Integer id) throws ApiException {
         OrderItemPojo p = dao.select(id);
         if (p == null) {
             throw new ApiException("OrderItem with given ID does not exists, id: " + id);
@@ -51,7 +50,7 @@ public class OrderItemService {
         return p;
     }
     @Transactional
-    public List<OrderItemPojo> getByOrderId(int id) throws ApiException {
+    public List<OrderItemPojo> getByOrderId(Integer id) throws ApiException {
         List<OrderItemPojo> p = dao.selectByOrderId(id);
         if (p == null) {
             throw new ApiException("Order with given ID does not exists, id: " + id);

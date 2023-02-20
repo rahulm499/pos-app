@@ -21,7 +21,7 @@ import com.increff.pos.model.data.InfoData;
 import com.increff.pos.model.form.LoginForm;
 import com.increff.pos.pojo.UserPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.UserService;
+import com.increff.pos.service.UserApiService;
 import com.increff.pos.util.SecurityUtil;
 import com.increff.pos.util.UserPrincipal;
 
@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
 public class LoginController {
 
 	@Autowired
-	private UserService service;
+	private UserApiService service;
 	@Autowired
 	private InfoData info;
 	
@@ -41,7 +41,7 @@ public class LoginController {
 		UserPojo p = service.get(f.getEmail());
 		boolean authenticated = (p != null && Objects.equals(p.getPassword(), f.getPassword()));
 		if (!authenticated) {
-			return new ModelAndView("redirect:/site/login");
+			throw new ApiException("Email or password is invalid");
 		}
 
 		// Create authentication object

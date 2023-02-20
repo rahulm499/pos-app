@@ -5,22 +5,23 @@ import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.InventoryService;
-import com.increff.pos.service.ProductService;
+import com.increff.pos.service.InventoryApiService;
+import com.increff.pos.service.ProductApiService;
 import com.increff.pos.util.StringUtil;
 import com.increff.pos.util.helper.InventoryHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class InventoryDto {
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryApiService inventoryApiService;
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
     @Autowired
     private InventoryFlow inventoryFlow;
 
@@ -31,14 +32,14 @@ public class InventoryDto {
     }
 
     public void delete(Integer id) {
-        inventoryService.delete(id);
+        inventoryApiService.delete(id);
     }
 
     public InventoryData get(Integer id) throws ApiException {
         return inventoryFlow.get(id);
     }
     public List<InventoryData> getAll() throws ApiException {
-        List<InventoryPojo> pojoList = inventoryService.getAll();
+        List<InventoryPojo> pojoList = inventoryApiService.getAll();
         List<InventoryData> dataList = new ArrayList<InventoryData>();
         for(InventoryPojo inventoryPojo: pojoList){
             dataList.add(get(inventoryPojo.getId()));
@@ -49,7 +50,7 @@ public class InventoryDto {
     public void update(Integer id, InventoryForm form) throws ApiException {
         normalize(form);
         validate(form);
-        inventoryService.update(id, InventoryHelperUtil.convertInventory(form, id));
+        inventoryApiService.update(id, InventoryHelperUtil.convertInventory(form, id));
     }
 
     protected void normalize(InventoryForm form) {
@@ -66,5 +67,6 @@ public class InventoryDto {
         if(form.getQuantity()<0){
             throw new ApiException("Quantity cannot be less than 0");
         }
+
     }
 }

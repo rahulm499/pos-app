@@ -34,10 +34,7 @@ function handleSuccessMessage(response){
 	toastr["success"](response, "Success:");
 	return;
 }
-
-function handleAjaxError(response){
-	var response = JSON.parse(response.responseText);
-	console.log(response)
+function handleErrorMsg(response){
 	toastr.options = {
       "closeButton": true,
         "debug": false,
@@ -55,7 +52,11 @@ function handleAjaxError(response){
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     }
-	toastr["error"](response.message, "Error:");
+	toastr["error"](response, "Error:");
+}
+function handleAjaxError(response){
+	var response = JSON.parse(response.responseText);
+	handleErrorMsg(response.message)
 }
 
 function readFileData(file, callback){

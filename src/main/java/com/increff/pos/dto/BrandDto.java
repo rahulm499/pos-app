@@ -1,31 +1,27 @@
 package com.increff.pos.dto;
 
 
-import com.increff.pos.flow.BrandFlow;
 import com.increff.pos.model.data.BrandData;
 import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.BrandService;
+import com.increff.pos.service.BrandApiService;
 import com.increff.pos.util.HelperUtil;
 import com.increff.pos.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class BrandDto {
     @Autowired
-    private BrandService service;
-    @Autowired
-    private BrandFlow flow;
-
+    private BrandApiService service;
     public void add(BrandForm form) throws ApiException {
         normalizeBrandForm(form);
         validateBrandForm(form);
-        flow.add(HelperUtil.convertBrand(form));
+        service.add(HelperUtil.convertBrand(form));
     }
 
     public void delete(Integer id) {
@@ -52,7 +48,7 @@ public class BrandDto {
     public void update(Integer id, BrandForm form) throws ApiException {
         normalizeBrandForm(form);
         validateBrandForm(form);
-        flow.update(id, HelperUtil.convertBrand(form));
+        service.update(id, HelperUtil.convertBrand(form));
     }
 
 

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.increff.pos.model.data.AboutAppData;
-import com.increff.pos.service.AboutAppService;
+import com.increff.pos.service.AboutAppApiService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiOperation;
 public class AboutApiController {
 
 	@Autowired
-	private AboutAppService service;
+	private AboutAppApiService service;
 
 	@ApiOperation(value = "Gives application name and version")
 	@RequestMapping(path = "/api/about", method = RequestMethod.GET)

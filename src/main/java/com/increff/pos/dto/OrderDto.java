@@ -11,44 +11,49 @@ import com.increff.pos.util.StringUtil;
 import com.increff.pos.util.helper.OrderHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class OrderDto {
 
     @Autowired
-    private OrderItemService orderItemService;
+    private OrderItemApiService orderItemApiService;
     @Autowired
-    private OrderService orderService;
+    private OrderApiService orderApiService;
     @Autowired
-    private InventoryService inventoryService;
+    private InventoryApiService inventoryApiService;
 
     @Autowired
-    private ProductService productService;
+    private ProductApiService productApiService;
     @Autowired
     private OrderFlow orderFlow;
 
+    @Transactional(rollbackFor = ApiException.class)
     public void add(OrderForm form) throws ApiException {
         normalizeOrder(form);
         validateOrderForm(form);
         List<OrderItemPojo> orderItemPojo = orderFlow.convertOrderItem(form.getOrder());
         OrderPojo orderPojo = OrderHelperUtil.convertOrder(form);
-        orderService.add(orderPojo);
-        orderFlow.add(orderItemPojo, orderPojo.getId());
+        orderFlow.add(orderItemPojo, orderPojo);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void delete(Integer id) throws ApiException {
         orderFlow.delete(id);
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public OrderData get(Integer id) throws ApiException {
-        return convertOrderForm(orderFlow.getOrderItems(id), orderService.get(id));
+        return convertOrderForm(orderFlow.getOrderItems(id), orderApiService.get(id));
     }
+    @Transactional(rollbackFor = ApiException.class)
     public List<OrderData> getAll() throws ApiException {
-        List<OrderPojo> orderPojoList = orderService.getAll();
+        List<OrderPojo> orderPojoList = orderApiService.getAll();
         List<OrderData> data = new ArrayList<>();
         for(OrderPojo orderPojo: orderPojoList){
             OrderData d = get(orderPojo.getId());
@@ -61,7 +66,7 @@ public class OrderDto {
         normalizeOrderItem(form);
         validateOrderItemForm(form);
         OrderItemPojo orderItemPojo = OrderHelperUtil.convertOrderItem(form);
-        orderItemPojo.setProductId(productService.getCheckBarcode(form.getBarcode()).getId());
+        orderItemPojo.setProductId(productApiService.getCheckBarcode(form.getBarcode()).getId());
         orderFlow.validate(orderItemPojo);
     }
 
@@ -84,6 +89,9 @@ public class OrderDto {
         form.setBarcode(StringUtil.toLowerCase(form.getBarcode()));
     }
     protected void validateOrderForm(OrderForm form) throws ApiException {
+        if(form.getOrder().size() == 0){
+            throw new ApiException("Order does not contain any item");
+        }
         for(OrderItemForm orderItemForm: form.getOrder()){
             validateOrderItemForm(orderItemForm);
         }

@@ -6,8 +6,8 @@ function getBrandUrl(){
 
 function brandFormToggle(event){
 	//Set the values to update
-	$('#brand-add-form input[name=brand').val('');
-    $('#brand-add-form input[name=category').val('');
+	$('#brand-add-form input[name=brand]').val('');
+    $('#brand-add-form input[name=category]').val('');
 	$('#brand-add-modal').modal('toggle');
 	return false;
 }
