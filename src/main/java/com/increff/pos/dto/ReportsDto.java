@@ -11,81 +11,90 @@ import com.increff.pos.model.data.InventoryReportData;
 import com.increff.pos.model.form.SalesReportForm;
 import com.increff.pos.pojo.*;
 import com.increff.pos.service.*;
-import com.increff.pos.util.helper.ReportsHelperUtil;
+import com.increff.pos.helper.ReportsHelperUtil;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import static com.increff.pos.helper.ReportsHelperUtil.*;
+
 @Service
 public class ReportsDto {
     @Autowired
-    private BrandApiService brandApiService;
+    private BrandApi brandApi;
     @Autowired
-    private ProductApiService productApiService;
+    private ProductApi productApi;
     @Autowired
-    private InventoryApiService inventoryApiService;
+    private InventoryApi inventoryApi;
     @Autowired
-    private OrderApiService orderApiService;
+    private OrderApi orderApi;
     @Autowired
-    private OrderItemApiService orderItemApiService;
+    private OrderItemApi orderItemApi;
     @Autowired
-    private DailyReportApiService dailyReportApiService;
+    private DailyReportApi dailyReportApi;
     @Autowired
     private ReportsFlow reportsFlow;
     public List<BrandReportData> generateBrandReport(BrandForm form) throws ApiException {
-        return covertBrandReport(reportsFlow.generateBrandReport(form));
+        return covertBrandReport(reportsFlow.generateBrandReport(convertBrandReportForm(form)));
     }
 
-    public ResponseEntity<byte[]> downloadBrandReport(String data) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<BrandReportData> brandReportDataList = objectMapper.readValue(data, new TypeReference<List<BrandReportData>>() {});
-        return reportsFlow.downloadBrandReport(brandReportDataList);
+    public ResponseEntity<byte[]> downloadBrandReport(BrandForm form) throws IOException, ApiException {
+        return reportsFlow.downloadBrandReport(reportsFlow.generateBrandReport(convertBrandReportForm(form)));
     }
 
     public List<InventoryReportData> generateInventoryReport(BrandForm form) throws ApiException {
-        List<BrandReportData> brandReportDataList = generateBrandReport(form);
-        return reportsFlow.generateInventoryReport(brandReportDataList);
+        Map<Integer, List<Object>> brandMap = reportsFlow.generateBrandReport(convertBrandReportForm(form));
+        Map<Integer, Integer> inventoryMap = reportsFlow.generateInventoryReport(brandMap);
+        List<InventoryReportData> inventoryReportDataList = new ArrayList<>();
+        inventoryMap.forEach((key, value) -> {
+            InventoryReportData inventoryReportData = convertInventoryReport(value, brandMap.get(key));
+            inventoryReportDataList.add(inventoryReportData);
+        });
+        return inventoryReportDataList;
     }
 
-    public ResponseEntity<byte[]> downloadInventoryReport(String data) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<InventoryReportData> inventoryReportDataList = objectMapper.readValue(data, new TypeReference<List<InventoryReportData>>() {});
-        return reportsFlow.downloadInventoryReport(inventoryReportDataList);
+    public ResponseEntity<byte[]> downloadInventoryReport(BrandForm form) throws IOException, ApiException {
+        Map<Integer, List<Object>> brandMap = reportsFlow.generateBrandReport(convertBrandReportForm(form));
+        Map<Integer, Integer> inventoryMap = reportsFlow.generateInventoryReport(brandMap);
+        return reportsFlow.downloadInventoryReport(brandMap, inventoryMap);
     }
 
-    public List<SalesReportData> getSalesReport(SalesReportForm form) throws ApiException {
+    public List<SalesReportData> generateSalesReport(SalesReportForm form) throws ApiException {
 
         validateSalesReport(form);
-        List<OrderPojo> orderPojoList = reportsFlow.getSalesReportOrderList(form);
-        HashMap<Integer, Pair<Integer, Double>> map= reportsFlow.getSalesReportProductList(orderPojoList);;
-        List<BrandReportData> brandReportDataList = generateBrandReport(form);
-        return reportsFlow.getSalesReportData(brandReportDataList, map);
-
+        List<OrderPojo> orderPojoList = reportsFlow.getSalesReportOrderList(form.getStartDate(), form.getEndDate());
+        Map<Integer, List<Object>> salesReportProductList= reportsFlow.getSalesReportProductList(orderPojoList);;
+        Map<Integer, List<Object>> brandMap = reportsFlow.generateBrandReport(convertBrandReportForm(form));
+        Map<Integer, List<Object>> salesMap = reportsFlow.getSalesReportData(brandMap, salesReportProductList);
+        return convertSalesReport(salesMap, brandMap);
     }
-    public ResponseEntity<byte[]> downloadSalesReport(String data) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<SalesReportData> salesReportDataList = objectMapper.readValue(data, new TypeReference<List<SalesReportData>>() {});
-        return reportsFlow.downloadSalesReport(salesReportDataList);
+    public ResponseEntity<byte[]> downloadSalesReport(SalesReportForm form) throws IOException, ApiException {
+
+        validateSalesReport(form);
+        List<OrderPojo> orderPojoList = reportsFlow.getSalesReportOrderList(form.getStartDate(), form.getEndDate());
+        Map<Integer, List<Object>> salesReportProductList= reportsFlow.getSalesReportProductList(orderPojoList);;
+        Map<Integer, List<Object>> brandMap = reportsFlow.generateBrandReport(convertBrandReportForm(form));
+        Map<Integer, List<Object>> salesMap = reportsFlow.getSalesReportData(brandMap, salesReportProductList);
+        return reportsFlow.downloadSalesReport(salesMap, brandMap);
     }
     public List<DailyReportData> getDailyReport(){
-        List<DailyReportPojo> dailyPojoList = dailyReportApiService.getAll();
+        List<DailyReportPojo> dailyPojoList = dailyReportApi.getAll();
         List<DailyReportData> data = new ArrayList<>();
         for(DailyReportPojo dailyReportPojo: dailyPojoList){
-            data.add(ReportsHelperUtil.convertDailyReport(dailyReportPojo));
+            data.add(convertDailyReport(dailyReportPojo));
         }
         return data;
     }
 
     public ResponseEntity<byte[]> downloadDailyReport() throws IOException {
-        return reportsFlow.downloadDailyReport(getDailyReport());
+        return reportsFlow.downloadDailyReport();
     }
 
     @Transactional(rollbackFor = ApiException.class)
@@ -94,38 +103,15 @@ public class ReportsDto {
         int invoiced_items_count=0;
         double revenue=0;
         for(OrderPojo orderPojo: orderPojoList){
-            List<OrderItemPojo> orderItems = orderItemApiService.getByOrderId(orderPojo.getId());
+            List<OrderItemPojo> orderItems = orderItemApi.getByOrderId(orderPojo.getId());
             for(OrderItemPojo orderItemPojo: orderItems){
                 invoiced_items_count+=orderItemPojo.getQuantity();
                 revenue+=orderItemPojo.getSellingPrice();
             }
         }
         DailyReportPojo dailyReportPojo = convertDailyReport(orderPojoList.size(), invoiced_items_count, revenue);
-        dailyReportApiService.add(dailyReportPojo);
+        dailyReportApi.add(dailyReportPojo);
     }
 
-    protected void validateSalesReport(SalesReportForm form) throws ApiException {
-        if(form.getStartDate()==""){
-            throw new ApiException("Start Date cannot be empty");
-        }else if(form.getEndDate()==""){
-            throw new ApiException("End Date cannot be empty");
-        }else if(LocalDate.parse(form.getEndDate()).isBefore(LocalDate.parse(form.getStartDate()))){
-            throw new ApiException("End Date cannot be before start date");
-        }
-    }
-    protected List<BrandReportData> covertBrandReport(List<BrandPojo> brandPojos){
-        List<BrandReportData> brandReportData = new ArrayList<>();
-        for(BrandPojo brandPojo: brandPojos){
-            brandReportData.add(ReportsHelperUtil.convertBrandReport(brandPojo));
-        }
-        return brandReportData;
-    }
-    protected DailyReportPojo convertDailyReport(Integer orderCount, Integer itemCount, Double revenue){
-        DailyReportPojo dailyReportPojo = new DailyReportPojo();
-        dailyReportPojo.setDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).minusDays(1));
-        dailyReportPojo.setInvoiced_orders_count(orderCount);
-        dailyReportPojo.setInvoiced_items_count(itemCount);
-        dailyReportPojo.setTotal_revenue(revenue);
-        return dailyReportPojo;
-    }
+
 }

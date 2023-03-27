@@ -24,36 +24,20 @@
 				<!-- Password input -->
 				<div class="form-outline mb-4">
 					<label class="form-label" for="password"></label>
-					<input type="password" id="password" class="form-control" name="password" placeholder="Password"/>
+					<input type="password" id="password" class="form-control" name="password" placeholder="Password" maxlength="50"/>
 				</div>
-
-				<!-- 2 column grid layout for inline styling -->
-				<div class="row mb-4">
-					<div class="col d-flex justify-content-center">
-						<!-- Checkbox -->
-						<div class="form-check">
-							<input class="form-check-input" type="checkbox" value="" id="remember" checked />
-							<label class="form-check-label" for="remember"> Remember me </label>
-						</div>
-					</div>
-
-					<div class="col">
-						<!-- Simple link -->
-						<a href="#!">Forgot password?</a>
-					</div>
-				</div>
-
 				<!-- Submit button -->
 				<button type="submit" class="btn btn-dark btn-block mb-4" id="login">Login</button>
 			</form>
 				<div class="text-center">
-					<p>Not a member? <a href="#!">Create an account</a></p>
+					<p>Not a member? <a th:href="@{/site/signup}">Create an account</a></p>
 				</div>
 			</div>
+		<p id="info" hidden>[[${info.getMessage()}]]</p>
 	</div>
 </div>
 <footer th:replace="snippets.html :: name_footer"></footer>
-
+<script th:src="@{/static/login.js}"/></script>
 </body>
 
 </html>

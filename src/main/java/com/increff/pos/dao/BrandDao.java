@@ -29,13 +29,6 @@ public class BrandDao extends AbstractDao{
         em.persist(p);
     }
 
-    @Transactional
-    public Integer delete(Integer id) {
-        Query query = em.createQuery(delete_id);
-        query.setParameter("id", id);
-        return query.executeUpdate();
-    }
-
     public BrandPojo select(Integer id) {
         TypedQuery<BrandPojo> query = getQuery(select_id, BrandPojo.class);
         query.setParameter("id", id);

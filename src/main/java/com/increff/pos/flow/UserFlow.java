@@ -2,7 +2,7 @@ package com.increff.pos.flow;
 
 import com.increff.pos.pojo.UserPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.UserApiService;
+import com.increff.pos.service.UserApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,21 +15,21 @@ import java.util.Properties;
 @Service
 public class UserFlow {
     @Autowired
-    private UserApiService userApiService;
+    private UserApi userApi;
 
     @Transactional(rollbackFor = ApiException.class)
     public void add(UserPojo userPojo) throws ApiException {
-        if(userApiService.get(userPojo.getEmail())!=null){
+        if(userApi.get(userPojo.getEmail())!=null){
             throw new ApiException("User with given email already exists");
         }
 
-        userApiService.add(userPojo);
+        userApi.add(userPojo);
     }
 
     @Transactional(rollbackFor = ApiException.class)
     public void update(UserPojo userPojo) throws ApiException {
-        userApiService.getCheck(userPojo.getEmail());
-        userApiService.update(userPojo);
+        userApi.getCheck(userPojo.getEmail());
+        userApi.update(userPojo);
     }
 
     @Transactional(rollbackFor = IOException.class)

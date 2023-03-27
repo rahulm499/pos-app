@@ -9,21 +9,21 @@
 <nav th:replace="snippets.html :: name_app_navbar"></nav>
 
 <div class="container mt-5 col-9">
-
-<h1> Brands</h1>
-	<div class="row">
-		&nbsp;
+	<div class="row d-flex justify-content-between mr-2 ml-2 mt-4">
+		<h1>Brands</h1>
+		 <!-- Top row with form-->
+		<div class="d-flex flex-column justify-content-center role">
+			 <div class="row">
+				 <div class="col-12">
+						<form class="form-inline" id="brand-form">
+						  <button type="button" class="btn btn-primary custom-button" id="add-form" data-toggle="tooltip" data-placement="top" title="Add Brand"><i class="material-icons">add</i></button>
+							&nbsp;
+							<button type="button" class="btn btn-warning custom-button" id="upload-data" data-toggle="tooltip" data-placement="top" title="Upload Brands"><i class="material-icons">upload</i></button>
+						</form>
+				 </div>
+			</div>
+		</div>
 	</div>
- <!-- Top row with form-->
- <div class="row">
-	 <div class="col-12">
-			<form class="form-inline" id="brand-form">
-			  <button type="button" class="btn btn-dark custom-button" id="add-form"><i class="material-icons">add</i> Add Brand</button>
-				&nbsp;
-				<button type="button" class="btn btn-dark custom-button" id="upload-data"><i class="material-icons">upload</i>Upload</button>
-			</form>
-	 </div>	
-</div>
 	<div class="modal fade" id="brand-add-modal" tabindex="-1" role="dialog" >
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -38,20 +38,20 @@
 						<div class="form-group">
 							<label for="inputBrand">Brand</label>
 							<div>
-								<input type="text" class="form-control" required name="brand" id="inputBrand" placeholder="Enter brand" maxlength="100">
+								<input type="text" class="form-control" required name="brand" id="inputBrand" placeholder="Enter brand" maxlength="50">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="inputCategory" >Category</label>
 							<div>
-								<input type="text" class="form-control" required name="category" id="inputCategory" placeholder="Enter category" maxlength="100">
+								<input type="text" class="form-control" required name="category" id="inputCategory" placeholder="Enter category" maxlength="50">
 							</div>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-dark" id="add-brand">Add</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="add-brand">Add</button>
 				</div>
 			</div>
 		</div>
@@ -65,13 +65,13 @@
 
  <!-- Table -->
  <div class="col-12">
-	<table class="table table-striped" id="brand-table">
+	<table class="table table-striped table-bordered text-center" id="brand-table">
 	  <thead class="table-dark">
 	    <tr>
-	      <th scope="col" class="col-2">#</th>
-	      <th scope="col" class="col-4">Brand</th>
-	      <th scope="col" class="col-4">Category</th>
-		  <th scope="col" class="col-2 text-center">Action</th>
+	      <th scope="col" class="">#</th>
+	      <th scope="col" class="">Brand</th>
+	      <th scope="col" class="">Category</th>
+		  <th scope="col" class="text-center role">Action</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -95,21 +95,21 @@
 						<div class="form-group">
 							<label for="editBrand" >Brand</label>
 							<div>
-								<input type="text" class="form-control" required name="brand" id="editBrand" placeholder="Enter brand" maxlength="100">
+								<input type="text" class="form-control" required name="brand" id="editBrand" placeholder="Enter brand"  maxlength="50">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="editCategory">Category</label>
 							<div>
-								<input type="text" class="form-control" required name="category" id="editCategory" placeholder="Enter category" maxlength="100">
+								<input type="text" class="form-control" required name="category" id="editCategory" placeholder="Enter category"  maxlength="50">
 							</div>
 						</div>
 						<input type="text" class="form-control" name="id" id="editId" hidden="hidden">
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-dark" id="update-brand">Update</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="update-brand">Update</button>
 				</div>
 			</div>
 		</div>
@@ -119,7 +119,7 @@
 
 
 	<!-- Brand Edit Modal -->
-	<div class="modal" tabindex="-1" role="dialog" id="upload-brand-modal">
+	<div class="modal fade" tabindex="-1" role="dialog" id="upload-brand-modal">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 
@@ -137,8 +137,8 @@
 					</div>
 					<a th:href="@{/sample/brand.tsv}" target="_blank">Download Sample</a>
 					<br>
-					Rows: <span id="rowCount">0</span>,
 					Processed: <span id="processCount">0</span>,
+					Success: <span id="successCount">0</span>,
 					Errors: <span id="errorCount">0</span>
 				</div>
 

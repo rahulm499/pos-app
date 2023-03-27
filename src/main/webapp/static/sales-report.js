@@ -32,15 +32,7 @@ function createSet(data){
 
 }
 
-function setMinEndDate(event){
-    const dateInput = document.getElementById("end-date");
-    $("#end-date").val("");
-    dateInput.setAttribute("min", event.target.value);
- }
- function setMaxStartDate(event){
-     const dateInput = document.getElementById("start-date");
-     dateInput.setAttribute("max", event.target.value);
-  }
+
  var reportData =[]
 function generateReport(event){
 	//Set the values to update
@@ -54,7 +46,7 @@ function generateReport(event){
 	   data: json,
 	   headers: {
        	'Content-Type': 'application/json'
-       },	   
+       },
 	   success: function(data) {
 	        reportData = data
 	   		displaySalesList(data);
@@ -67,9 +59,10 @@ function generateReport(event){
 
 
 function downloadReport(event){
-	//Set the values to update
-	var json = JSON.stringify(reportData);
+    var $form = $("#sales-report-form");
+	var json = toJson($form);
 	var url = getSalesReportUrl() +'/download' ;
+    console.log(json)
 	$.ajax({
 	   url: url,
 	   type: 'POST',
@@ -78,19 +71,18 @@ function downloadReport(event){
        	'Content-Type': 'application/json'
        },
 	   success: function(data) {
-                var a = document.createElement('a');
-                var blob = new Blob([data], {type: "text/plain"});
-                var url = URL.createObjectURL(blob);
-                a.href = url;
-                a.download = 'data.csv';
-                document.body.append(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-	   },
-	   error: handleAjaxError
+           var a = document.createElement('a');
+           var blob = new Blob([data], {type: "text/plain"});
+           var url = URL.createObjectURL(blob);
+           a.href = url;
+           a.download = 'data.csv';
+           document.body.append(a);
+           a.click();
+           document.body.removeChild(a);
+           URL.revokeObjectURL(url);
+       },
+       error: handleAjaxError
 	});
-
 	return false;
 }
 
@@ -121,21 +113,43 @@ function displaySalesList(data){
 		+ '<td>' + e.brand + '</td>'
 		+ '<td>'  + e.category + '</td>'
 		+ '<td>'  + e.quantity + '</td>'
-		+ '<td>'  + e.revenue + '</td>'
+		+ '<td>'  + e.revenue.toFixed(2) + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
 }
-
+function setMinEndDate(event){
+    const dateInput = document.getElementById("end-date");
+    $("#end-date").val("");
+    dateInput.setAttribute("min", event.target.value);
+ }
+ function setMaxStartDate(event){
+     const dateInput = document.getElementById("start-date");
+     dateInput.setAttribute("max", event.target.value);
+  }
+function setDates(){
+    const endDateInput = document.getElementById("end-date");
+    const startDateInput = document.getElementById("start-date");
+	const today = new Date().toISOString().substr(0, 10);
+	const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10);
+    $("#end-date").val(today);
+    $("#start-date").val(thirtyDaysAgo);
+    endDateInput.setAttribute("max", today);
+    endDateInput.setAttribute("min", thirtyDaysAgo);
+    startDateInput.setAttribute("min", thirtyDaysAgo);
+    startDateInput.setAttribute("max", today);
+}
 //INITIALIZATION CODE
 function init(){
     $("#report").hide()
 	$('#generate-report').click(generateReport);
 	$('#start-date').change(setMinEndDate);
 	$('#download-report').click(downloadReport);
+
 }
 
 $(document).ready(init);
+$(document).ready(setDates)
 $(document).ready(getBrandList);
 $(document).ready(addOptionValues);
 

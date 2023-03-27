@@ -9,8 +9,8 @@ function productFormToggle(event){
 	//Set the values to update
 	$('#product-add-form input[name=name]').val('');
     $('#product-add-form input[name=barcode]').val('');
-    $('#product-add-form input[name=brand_category]').val('');
-    $('#product-add-form input[name=brand_name]').val('');
+    $('#product-add-form input[name=brandCategory]').val('');
+    $('#product-add-form input[name=brandName]').val('');
     $('#product-add-form input[name=mrp]').val('');
 	$('#product-add-modal').modal('toggle');
 	return false;
@@ -96,7 +96,9 @@ function deleteProduct(id){
 // FILE UPLOAD METHODS
 var fileData = [];
 var errorData = [];
+var errorCount = 0;
 var processCount = 0;
+var successCount = 0;
 
 
 function processData(){
@@ -105,48 +107,96 @@ function processData(){
 }
 
 function readFileDataCallback(results){
+var headings = ["barcode", "name", "brandName", "brandCategory", "mrp"]
+    if(JSON.stringify(results.meta.fields.sort()) != JSON.stringify(headings.sort())){
+        handleErrorMsg("Data headings are invalid");
+        return;
+    }
 	fileData = results.data;
 	uploadRows();
 }
 
 function uploadRows(){
-	//Update progress
-	updateUploadDialog();
-	//If everything processed then return
-	if(processCount==fileData.length){
-		return;
-	}
-	
-	//Process next row
-	var row = fileData[processCount];
-	processCount++;
-	
-	var json = JSON.stringify(row);
-	var url = getProductUrl();
+	 var form = $('#productFile')[0].files[0];
+         var data = new FormData();
+         data.append("file", form);
+	var url = getProductUrl()+'/upload';
 
 	//Make ajax call
 	$.ajax({
-	   url: url,
-	   type: 'POST',
-	   data: json,
-	   headers: {
-       	'Content-Type': 'application/json'
-       },	   
-	   success: function(response) {
-	   handleSuccessMessage("Product added successfully");
-	   		uploadRows();  
-	   },
-	   error: function(response){
-	   		row.error=response.responseText
-	   		errorData.push(row);
-	   		uploadRows();
-	   }
-	});
+          url: url,
+          type: 'POST',
+          data: data,
+          enctype: 'multipart/form-data',
+          processData: false, //prevent jQuery from automatically transforming the data into a query string
+          contentType: false,
+          cache: false,
+          xhrFields: {
+            responseType: 'blob'
+          },
+          success: function(response) {
+            // Parse TSV data from the response
+            errorData = response;
+            var reader = new FileReader();
+            reader.onload = function() {
+              var data = new TextDecoder("utf-8").decode(new Uint8Array(reader.result));
+
+              // Split TSV data into rows
+              var rows = data.split("\n");
+
+              // Remove empty rows
+              rows = rows.filter(function(row) {
+                return row.trim().length > 0;
+              });
+
+              // Log the number of rows
+              console.log("Number of rows: " + rows.length);
+              if(rows.length!=0){
+              errorCount = rows.length -1;
+              processCount = fileData.length;
+              successCount = processCount - errorCount;}else{
+              processCount = fileData.length;
+              successCount = processCount
+              }
+              updateUploadDialog();
+              getProductList();
+            };
+            reader.readAsArrayBuffer(response);
+
+            // Rest of success callback function
+
+            handleSuccessMessage("File uploaded successfully");
+            if(errorData.size != 0){
+            var a = document.createElement('a');
+            var blob = new Blob([response], {type: "text/tsv"});
+            var url = URL.createObjectURL(blob);
+            a.href = url;
+            a.download = 'data.tsv';
+            document.body.append(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);}
+
+          },
+          error: function(response) {
+            console.log(response);
+            handleErrorMsg("Unable to process file");
+            errorCount = fileData.length;
+          }
+        });
 
 }
 
 function downloadErrors(){
-	writeFileData(errorData);
+	var a = document.createElement('a');
+                var blob = new Blob([errorData], {type: "text/tsv"});
+                var url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = 'data.tsv';
+                document.body.append(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
 }
 
 //UI DISPLAY METHODS
@@ -156,15 +206,15 @@ function displayProductList(data){
 	$tbody.empty();
 	for(var i in data){
 		var e = data[i];
-		var buttonHtml = ' <button onclick="displayEditProduct(' + e.id + ')" class="btn btn-dark custom-button edit-button mx-auto"><i class="material-icons">edit</i>Edit</button>'
+		var buttonHtml = ' <button onclick="displayEditProduct(' + e.id + ')" class="btn btn-outline-dark custom-button edit-button mx-auto" data-toggle="tooltip" data-placement="top" title="Edit Product"><i class="material-icons">edit</i></button>'
 		var row = '<tr>'
 		+ '<th scope="row">' + e.id + '</th>'
 		+ '<td>' + e.barcode + '</td>'
-		+ '<td>'  + e.brand_name + '</td>'
-		+ '<td>' + e.brand_category + '</td>'
+		+ '<td>'  + e.brandName + '</td>'
+		+ '<td>' + e.brandCategory + '</td>'
         + '<td>'  + e.name + '</td>'
-        + '<td>'  + e.mrp + '</td>'
-		+ '<td class="text-center">' + buttonHtml + '</td>'
+        + '<td>'  + e.mrp.toFixed(2) + '</td>'
+		+ '<td class="text-center role">' + buttonHtml + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}
@@ -190,16 +240,18 @@ function resetUploadDialog(){
 	$('#productFileName').html("Choose File");
 	//Reset various counts
 	processCount = 0;
-	fileData = [];
-	errorData = [];
+    	errorCount = 0;
+    	successCount = 0;
+    	fileData = [];
+    	errorData = [];
 	//Update counts	
 	updateUploadDialog();
 }
 
 function updateUploadDialog(){
-	$('#rowCount').html("" + fileData.length);
-	$('#processCount').html("" + processCount);
-	$('#errorCount').html("" + errorData.length);
+	$('#successCount').html("" + successCount);
+    	$('#processCount').html("" + processCount);
+    	$('#errorCount').html("" + errorCount);
 }
 
 function updateFileName(){
@@ -214,10 +266,10 @@ function displayUploadData(){
 }
 
 function displayProduct(data){
-	$("#product-edit-form input[name=brand_name]").val(data.brand_name);
-	$("#product-edit-form input[name=brand_category]").val(data.brand_category);
+	$("#product-edit-form input[name=brandName]").val(data.brandName);
+	$("#product-edit-form input[name=brandCategory]").val(data.brandCategory);
 	$("#product-edit-form input[name=barcode]").val(data.barcode);
-	$("#product-edit-form input[name=mrp]").val(data.mrp);
+	$("#product-edit-form input[name=mrp]").val(data.mrp.toFixed(2));
 	$("#product-edit-form input[name=name]").val(data.name);
 	$("#product-edit-form input[name=id]").val(data.id);
 	$('#edit-product-modal').modal('toggle');
@@ -225,9 +277,7 @@ function displayProduct(data){
 
 function setRole(){
 if(getRole() === 'operator'){
-    $('#add-form').prop("disabled", true)
-    $('#upload-data').prop("disabled", true)
-    $(".edit-button").prop("disabled", true);
+    $(".role").remove();
 }
 }
 //INITIALIZATION CODE

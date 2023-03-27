@@ -111,11 +111,23 @@ for (var i = 0; i < navLinks.length; i++) {
   }
 }
 }
-
+function logoutRedirect(){
+localStorage.setItem('toastrMessage', 'User logged out successfully');
+}
 $(document).ready(setActive());
 $(document).ready(()=>{
+    var toastrMessage = localStorage.getItem('toastrMessage');
+    if (toastrMessage) {
+      // Display the Toastr notification
+      handleSuccessMessage(toastrMessage);
+      // Remove the message from the localStorage object
+      localStorage.removeItem('toastrMessage');
+    }
     console.log(getRole())
     if(getRole()==='supervisor'){
         $("#admin").prop("hidden", false)
     }
+    if(getRole()==='operator'){
+            $(".role").remove()
+        }
 })

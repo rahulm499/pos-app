@@ -18,7 +18,7 @@ public class DailyReportPojo {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private ZonedDateTime date;
     @Column(nullable = false)
     private Integer invoiced_orders_count;

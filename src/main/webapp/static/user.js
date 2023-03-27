@@ -5,9 +5,9 @@ function getUserUrl(){
 }
 function userFormToggle(event){
 	//Set the values to update
-	$('#user-add-form input[name=email').val('');
-    $('#user-add-form input[name=password').val('');
-    $('#user-add-form input[name=role').val('');
+	$('#user-add-form input[name=email]').val('');
+    $('#user-add-form input[name=password]').val('');
+    $('#user-add-form input[name=role]').val('');
 	$('#user-add-modal').modal('toggle');
 	return false;
 }
@@ -93,6 +93,7 @@ function deleteUserModal(id){
 //UI DISPLAY METHODS
 function displayUser(data){
     $('#user-edit-form input[name=email]').val(data.email);
+    $('#user-edit-form input[name=role]').val(data.rol);
         $('#user-edit-form input[name=id]').val(data.id);
         $('#user-edit-modal').modal('toggle');
 }
@@ -100,15 +101,17 @@ function displayUserList(data){
 	console.log('Printing user data');
 	var $tbody = $('#user-table').find('tbody');
 	$tbody.empty();
+	var index=0
 	for(var i in data){
+	index++;
 		var e = data[i];
         var buttonHtml = '<div class="d-flex flex-row justify-content-center">'
-		buttonHtml += ' <button onclick="displayEditUser(' + e.id + ')" class="btn btn-dark custom-button mr-1"><i class="material-icons">edit</i>Edit</button>'
-		buttonHtml += '<button onclick="deleteUserModal(' + e.id + ')" class="btn btn-dark custom-button"><i class="material-icons">delete</i>Delete</button>'
+		buttonHtml += ' <button onclick="displayEditUser(' + e.id + ')" class="btn btn-outline-dark custom-button mr-1" data-toggle="tooltip" data-placement="top" title="Edit User"><i class="material-icons">edit</i></button>'
+		buttonHtml += '<button onclick="deleteUserModal(' + e.id + ')" class="btn btn-outline-dark custom-button" data-toggle="tooltip" data-placement="top" title="Delete User"><i class="material-icons">delete</i></button>'
 		buttonHtml += '</div>'
 		const capitalizedStr = e.role.charAt(0).toUpperCase() + e.role.slice(1);
 		var row = '<tr>'
-		+ '<td scope="row">' + e.id + '</td>'
+		+ '<th scope="row">' + index + '</th>'
 		+ '<td>' + e.email + '</td>'
 		+ '<td>' + capitalizedStr + '</td>'
 		+ '<td>' + buttonHtml + '</td>'

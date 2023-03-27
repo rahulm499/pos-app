@@ -59,43 +59,41 @@ function generateReport(event){
 }
 
 function downloadReport(event){
-	//Set the values to update
-	var json = JSON.stringify(reportData);
-	var url = getBrandReportUrl() +'/download' ;
-	$.ajax({
-	   url: url,
-	   type: 'POST',
-	   data: json,
-	   headers: {
-       	'Content-Type': 'application/json'
-       },
-	   success: function(data) {
-                var a = document.createElement('a');
-                var blob = new Blob([data], {type: "text/plain"});
-                var url = URL.createObjectURL(blob);
-                a.href = url;
-                a.download = 'data.csv';
-                document.body.append(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-	   },
-	   error: handleAjaxError
-	});
+    var $form = $("#brand-form");
+    	var json = toJson($form);
+    	var url = getBrandReportUrl() +'/download' ;
+        console.log(json)
+    	$.ajax({
+    	   url: url,
+    	   type: 'POST',
+    	   data: json,
+    	   headers: {
+           	'Content-Type': 'application/json'
+           },
+           success: function(data) {
+                    var blob = new Blob([data], { type: 'text/tsv' });
+                    var url = URL.createObjectURL(blob);
+                    var link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'brands.tsv');
+                    link.click();
+           },
+           error: handleAjaxError
+    	});
 
-	return false;
 }
 
 function addOptionValues(){
     brandSet.forEach(key => {
-      $('#inputBrand').append('<option value="' + key + '">' + key + '</option>');
-    })
+        brandSet.forEach(key => {
+          $('#inputBrand').append('<option value="' + key + '">' + key + '</option>');
+        })
 
 
     categorySet.forEach(key => {
         $('#inputCategory').append('<option value="' + key + '">' + key + '</option>');
      })
-}
+})}
 
 
 //UI DISPLAY METHODS

@@ -10,14 +10,69 @@
 
 <div class="container">
  <!-- Top row with form-->
-<div class="row">
-	 <div class="col-2">
-	 	<a th:href="@{/ui/employee}" title="Employees"> <i class="fas fa-users"></i> </a>
-	 </div>	
-	 <div class="col-2">
-	 	<a th:href="@{/ui/admin}" title="Admin"> <i class="fas fa-cog"></i> </a>
-	 </div>	
-</div> 
+
+	<div class="d-flex flex-wrap flex-row justify-content-around mt-5">
+		<div class="list-item">
+			<a th:href="@{/ui/brand}" class="icon-item fas fa-industry" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Brands</span>
+			</div>
+		</div>
+
+		<div class="list-item">
+			<a th:href="@{/ui/product}" class="icon-item fas fa-box" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Products</span>
+			</div>
+		</div>
+
+		<div class="list-item">
+			<a th:href="@{/ui/inventory}" class="icon-item fas fa-warehouse" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Inventory</span>
+			</div>
+		</div>
+
+		<div class="list-item">
+			<a th:href="@{/ui/order}" class="icon-item fas fa-shopping-cart" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Orders</span>
+			</div>
+		</div>
+
+		<div class="list-item role">
+			<a th:href="@{/ui/admin}" class="icon-item fas fa-user-cog " role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Admin</span>
+			</div>
+		</div>
+
+		<div class="list-item">
+			<a th:href="@{/ui/brand-report}" class="icon-item fas fa-file-alt" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Brand Report</span>
+			</div>
+		</div>
+		<div class="list-item">
+			<a th:href="@{/ui/inventory-report}" class="icon-item fas fa-file-invoice" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Inventory Report</span>
+			</div>
+		</div>
+		<div class="list-item">
+			<a th:href="@{/ui/sales-report}" class="icon-item fas fa-chart-line" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Sales Report</span>
+			</div>
+		</div>
+		<div class="list-item">
+			<a th:href="@{/ui/daily-report}" class="icon-item fas fa-file-invoice-dollar" role="button"></a>
+			<div class="icon-text mt-1">
+				<span class="icon-span-text">Daily Report</span>
+			</div>
+		</div>
+
+	</div>
 
 
 

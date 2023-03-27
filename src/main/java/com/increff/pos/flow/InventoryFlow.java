@@ -5,33 +5,58 @@ import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.InventoryApiService;
-import com.increff.pos.service.ProductApiService;
-import com.increff.pos.util.helper.InventoryHelperUtil;
+import com.increff.pos.service.InventoryApi;
+import com.increff.pos.service.ProductApi;
+import com.increff.pos.helper.InventoryHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class InventoryFlow {
     @Autowired
-    private InventoryApiService inventoryApiService;
+    private InventoryApi inventoryApi;
     @Autowired
-    private ProductApiService productApiService;
+    private ProductApi productApi;
 
     @Transactional(rollbackFor = ApiException.class)
-    public void add(InventoryForm form) throws ApiException {
-        ProductPojo productPojo = productApiService.getCheckBarcode(form.getBarcode());
-        InventoryPojo inventoryPojo = InventoryHelperUtil.convertInventory(form, productPojo.getId());
-        inventoryApiService.add(inventoryPojo);
+    public void add(Integer quantity, String barcode) throws ApiException {
+        ProductPojo productPojo = productApi.getCheckBarcode(barcode);
+        InventoryPojo inventory = inventoryApi.getByProduct(productPojo.getId());
+        if(inventory!=null){
+            InventoryPojo inventoryPojo = new InventoryPojo();
+            inventoryPojo.setProductId(inventory.getProductId());
+            inventoryPojo.setQuantity(inventory.getQuantity() + quantity);
+            inventoryApi.update(inventory.getId(), inventoryPojo);
+        }else{
+            InventoryPojo inventoryPojo = InventoryHelperUtil.convertInventory(quantity, productPojo.getId());
+            inventoryApi.add(inventoryPojo);
+        }
+
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public InventoryData get(Integer id) throws ApiException {
-        InventoryPojo inventoryPojo = inventoryApiService.get(id);
-        ProductPojo productPojo = productApiService.get(inventoryPojo.getProductId());
-        InventoryData data = InventoryHelperUtil.convertInventory(inventoryPojo);
-        data.setBarcode(productPojo.getBarcode());
-        return data;
+    public List<Object> get(Integer id) throws ApiException {
+        List<Object> inventoryObject = new ArrayList<>();
+        InventoryPojo inventoryPojo = inventoryApi.get(id);
+        ProductPojo productPojo = productApi.get(inventoryPojo.getProductId());
+        inventoryObject.add(inventoryPojo);
+        inventoryObject.add(productPojo.getBarcode());
+        return inventoryObject;
+    }
+    @Transactional(rollbackFor = ApiException.class)
+    public Map<Integer, String> getAll() throws ApiException {
+        Map<Integer, String> map = new HashMap<>();
+        List<InventoryPojo> inventoryPojoList = inventoryApi.getAll();
+        for(InventoryPojo inventoryPojo: inventoryPojoList){
+            ProductPojo productPojo = productApi.get(inventoryPojo.getProductId());
+            map.put(inventoryPojo.getId(), productPojo.getBarcode());
+        }
+        return map;
     }
 }

@@ -1,70 +1,83 @@
 package com.increff.pos.dto;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.increff.pos.helper.BrandHelperUtil;
 import com.increff.pos.model.data.BrandData;
+import com.increff.pos.model.data.ErrorData;
 import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.BrandApiService;
-import com.increff.pos.util.HelperUtil;
-import com.increff.pos.util.StringUtil;
+import com.increff.pos.service.BrandApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.increff.pos.helper.BrandHelperUtil.*;
 
 @Service
 public class BrandDto {
     @Autowired
-    private BrandApiService service;
+    private BrandApi brandApi;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Transactional(rollbackFor = ApiException.class)
     public void add(BrandForm form) throws ApiException {
         normalizeBrandForm(form);
         validateBrandForm(form);
-        service.add(HelperUtil.convertBrand(form));
+        brandApi.add(convertBrand(form));
     }
 
-    public void delete(Integer id) {
-        service.delete(id);
+    @Transactional(rollbackFor = ApiException.class)
+    public ResponseEntity<byte[]> addBulk(MultipartFile file) throws ApiException, IOException, IllegalAccessException {
+        List<BrandForm> brandFormList = BrandHelperUtil.extractFileBrandData(file);
+        List<ErrorData> brandErrorData = new ArrayList<>();
+        int index =1, flag=0;
+        for(BrandForm brandForm: brandFormList){
+            try{add(brandForm);}
+            catch(ApiException e){
+                flag=1;
+                ErrorData errorData = createErrorData(brandForm, e.getMessage(), index);
+                brandErrorData.add(errorData);
+            }
+            index++;
+        }
+        if(flag == 0){
+            return null;
+        }
+        return BrandHelperUtil.convertToTSVFile(brandErrorData);
     }
-
 
     public BrandData get(Integer id) throws ApiException {
-        return HelperUtil.convertBrand(service.get(id));
+        return convertBrand(brandApi.get(id));
     }
 
 
     public List<BrandData> getAll() {
-        List<BrandPojo> pojoList = service.getAll();
+        List<BrandPojo> pojoList = brandApi.getAll();
         List<BrandData> brandDataList = new ArrayList<BrandData>();
 
         pojoList.forEach(brandPojo -> {
-            brandDataList.add(HelperUtil.convertBrand(brandPojo));
+            brandDataList.add(convertBrand(brandPojo));
         });
 
         return brandDataList;
     }
 
+    @Transactional(rollbackFor = ApiException.class)
     public void update(Integer id, BrandForm form) throws ApiException {
         normalizeBrandForm(form);
         validateBrandForm(form);
-        service.update(id, HelperUtil.convertBrand(form));
+        brandApi.update(id, convertBrand(form));
     }
 
 
-    // NORMALISATION AND VALIDATION OF FORM
-    protected static void normalizeBrandForm(BrandForm brandForm) {
-        brandForm.setBrand(StringUtil.toLowerCase(brandForm.getBrand()));
-        brandForm.setCategory(StringUtil.toLowerCase(brandForm.getCategory()));
-    }
-    protected void validateBrandForm(BrandForm brandForm) throws ApiException {
-        if(StringUtil.isEmpty(brandForm.getBrand())) {
-            throw new ApiException("Brand cannot be empty");
-        }
-        if(StringUtil.isEmpty(brandForm.getCategory())) {
-            throw new ApiException("Category cannot be empty");
-        }
-    }
 
 
 }

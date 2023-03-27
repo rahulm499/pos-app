@@ -7,8 +7,8 @@ import lombok.Setter;
 @Setter
 public class ProductForm {
     private String barcode;
-    private String brand_category;
-    private String brand_name;
+    private String brandCategory;
+    private String brandName;
     private String name;
     private Double mrp;
 

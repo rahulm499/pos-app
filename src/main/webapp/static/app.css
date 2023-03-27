@@ -1,10 +1,20 @@
 html {
 	position: relative;
+	width: 100%;
 	min-height: 100%;
 }
 
 body {
 	margin-bottom: 60px; /* Margin bottom by footer height */
+}
+
+.navbar {
+ background-color: #333;
+position: fixed;
+  top: 0;
+  width: 100%;
+  margin-bottom: 10px;
+  z-index: 1000;
 }
 .heading{
 display: flex;
@@ -14,13 +24,17 @@ display: flex;
   padding-right:2rem;
   border-bottom: 2px solid #f16366;
   }
+
+table td, table th {
+    max-width: 200px;
+    word-wrap: break-word;
+}
 .custom-button {
     display: flex;
       align-items: center;
   }
  .custom-button i{
-     font-size: 16px;
-     margin-right: 10px;
+     font-size: 22px;
    }
 .footer {
 	position: absolute;
@@ -35,4 +49,59 @@ display: flex;
 
 .fas{
     font-size: 4rem;
+}
+
+.container {
+    margin-top:50px;
+    padding-top:50px;
+}
+
+.list-item{
+        /* list-style-type: none; */
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-transition: all 0.3s ease;
+    border-radius: 0.25rem;
+    position: relative;
+    text-align: center;
+    font-size: 1.5rem;
+    width: 10rem;
+    height: auto;
+    margin-right: 30px;
+    margin-left: 30px;
+    margin-bottom: 70px;
+}
+
+.list-item:hover{
+    box-shadow: 0 0.125rem 0.3125rem 0 rgb(0 0 0 / 16%), 0 0.125rem 0.625rem 0 rgb(0 0 0 / 12%);
+}
+
+.icon-item {
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: #4f4f4f;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 2.5rem;
+    min-height: 4.375rem;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 100%;
+    height: 5.5rem;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    padding-top:20px;
+    padding-bottom:20px;
+}
+.icon-item:hover {
+    background-color: #1266f1;
+    color: #fff;
 }

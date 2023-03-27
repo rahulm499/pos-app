@@ -11,11 +11,11 @@ import com.increff.pos.spring.SpringConfig;
 
 @Configuration
 @ComponentScan(//
-		basePackages = { "com.increff.employee" }, //
+		basePackages = { "com.increff.pos" }, //
 		excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = { SpringConfig.class })//
 )
 @PropertySources({ //
-		@PropertySource(value = "classpath:./com/increff/employee/test.properties", ignoreResourceNotFound = true) //
+		@PropertySource(value = "classpath:./com/increff/pos/test.properties", ignoreResourceNotFound = true) //
 })
 public class QaConfig {
 

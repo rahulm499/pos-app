@@ -39,6 +39,7 @@ function generateReport(event){
 
 function downloadReport(event){
 	//Set the values to update
+
 	var url = getDailyReportUrl() +'/download' ;
 	$.ajax({
 	   url: url,
@@ -89,7 +90,7 @@ function displayDailyList(data){
 		+ '<td>' + convertDateTime(e.date) + '</td>'
 		+ '<td>'  + e.invoiced_orders_count + '</td>'
 		+ '<td>'  + e.invoiced_items_count + '</td>'
-		+ '<td>'  + e.total_revenue + '</td>'
+		+ '<td>'  + e.total_revenue.toFixed(2) + '</td>'
 		+ '</tr>';
         $tbody.append(row);
 	}

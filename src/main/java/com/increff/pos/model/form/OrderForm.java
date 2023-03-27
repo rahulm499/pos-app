@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class OrderForm {
-    private  List<OrderItemForm>order;
+    private  List<OrderItemForm> orderItems;
 
 }

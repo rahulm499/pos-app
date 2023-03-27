@@ -56,29 +56,29 @@ function generateReport(event){
 }
 
 function downloadReport(event){
-	//Set the values to update
-	var json = JSON.stringify(reportData);
-	var url = getInventoryReportUrl() +'/download' ;
-	$.ajax({
-	   url: url,
-	   type: 'POST',
-	   data: json,
-	   headers: {
-       	'Content-Type': 'application/json'
-       },
-	   success: function(data) {
-                var a = document.createElement('a');
-                var blob = new Blob([data], {type: "text/plain"});
-                var url = URL.createObjectURL(blob);
-                a.href = url;
-                a.download = 'data.csv';
-                document.body.append(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-	   },
-	   error: handleAjaxError
-	});
+	var $form = $("#inventory-report-form");
+    	var json = toJson($form);
+    	var url = getInventoryReportUrl() +'/download' ;
+    	$.ajax({
+    	   url: url,
+    	   type: 'POST',
+    	   data: json,
+    	   headers: {
+           	'Content-Type': 'application/json'
+           },
+            success: function(data) {
+                    var a = document.createElement('a');
+                    var blob = new Blob([data], {type: "text/plain"});
+                    var url = URL.createObjectURL(blob);
+                    a.href = url;
+                    a.download = 'data.csv';
+                    document.body.append(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+           },
+           error: handleAjaxError
+    	});
 
 	return false;
 }

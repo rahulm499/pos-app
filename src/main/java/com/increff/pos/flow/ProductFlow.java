@@ -4,38 +4,54 @@ import com.increff.pos.model.data.ProductData;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.ProductPojo;
 import com.increff.pos.service.ApiException;
-import com.increff.pos.service.BrandApiService;
-import com.increff.pos.service.ProductApiService;
-import com.increff.pos.util.helper.ProductHelperUtil;
+import com.increff.pos.service.BrandApi;
+import com.increff.pos.service.ProductApi;
+import com.increff.pos.helper.ProductHelperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
 public class ProductFlow {
     @Autowired
-    private BrandApiService brandApiService;
+    private BrandApi brandApi;
     @Autowired
-    private ProductApiService productApiService;
+    private ProductApi productApi;
 
     @Transactional(rollbackFor = ApiException.class)
     public void add(ProductPojo productPojo, String brand, String category) throws ApiException {
         validate(productPojo);
-        BrandPojo brandPojo = brandApiService.getCheckBrandCategory(brand, category);
+        BrandPojo brandPojo = brandApi.getCheckBrandCategory(brand, category);
         productPojo.setBrand_category(brandPojo.getId());
-        productApiService.add(productPojo);
+        productApi.add(productPojo);
     }
     @Transactional(rollbackFor = ApiException.class)
-    public ProductData get(Integer id) throws ApiException {
-        ProductPojo productPojo = productApiService.get(id);
-        BrandPojo brandPojo = brandApiService.get(productPojo.getBrand_category());
-        ProductData data =  ProductHelperUtil.convertProduct(productPojo, brandPojo.getBrand(), brandPojo.getCategory());
-        return data;
+    public Map<Integer, List<Object>> get(Integer id) throws ApiException {
+        Map<Integer, List<Object>> map = new HashMap<>();
+        List<Object> values = new ArrayList<>();
+        ProductPojo productPojo = productApi.get(id);
+        BrandPojo brandPojo = brandApi.get(productPojo.getBrand_category());
+        values.add(productPojo.getId());
+        values.add(productPojo.getName());
+        values.add(productPojo.getBarcode());
+        values.add(productPojo.getMrp());
+        values.add(brandPojo.getBrand());
+        values.add(brandPojo.getCategory());
+        map.put(productPojo.getId(), values);
+        return map;
 
+    }
+    public Integer getProductId(String Barcode) throws ApiException {
+        return productApi.getCheckBarcode(Barcode).getId();
     }
 
     protected void validate(ProductPojo productPojo) throws ApiException{
-        productApiService.validateBarcode(productPojo.getBarcode());
+        productApi.validateBarcode(productPojo.getBarcode());
     }
 }

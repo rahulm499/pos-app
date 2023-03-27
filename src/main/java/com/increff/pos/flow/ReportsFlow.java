@@ -11,8 +11,6 @@ import com.increff.pos.service.*;
 import com.opencsv.CSVWriter;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,60 +18,73 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.file.Files;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReportsFlow {
 
     @Autowired
-    private BrandApiService brandApiService;
+    private BrandApi brandApi;
     @Autowired
-    private ProductApiService productApiService;
+    private ProductApi productApi;
     @Autowired
-    private InventoryApiService inventoryApiService;
+    private InventoryApi inventoryApi;
     @Autowired
-    private OrderApiService orderApiService;
+    private OrderApi orderApi;
     @Autowired
-    private OrderItemApiService orderItemApiService;
+    private OrderItemApi orderItemApi;
+    @Autowired
+    private DailyReportApi dailyReportApi;
     @Transactional(rollbackFor = ApiException.class)
-    public List<BrandPojo> generateBrandReport(BrandForm form) throws ApiException {
+    public Map<Integer, List<Object>> generateBrandReport(BrandPojo brandPojo) throws ApiException {
         List<BrandPojo> brandPojos=new ArrayList<>();
-        if(form.getBrand() != "" && form.getCategory()!=""){
-            BrandPojo brand = brandApiService.getByBrandCategory(form.getBrand(), form.getCategory());
+        if(brandPojo.getBrand() != "" && brandPojo.getCategory()!=""){
+            BrandPojo brand = brandApi.getByBrandCategory(brandPojo.getBrand(), brandPojo.getCategory());
             if(brand != null){
                 brandPojos.add(brand);
             }
-            return brandPojos;
-        }else if(form.getBrand() != ""){
-            return brandApiService.getBrand(form.getBrand());
-        }else if(form.getCategory()!=""){
-            return brandApiService.getCategory(form.getCategory());
+            return convertBrandPojoListToMap(brandPojos);
+        }else if(brandPojo.getBrand() != ""){
+            return convertBrandPojoListToMap(brandApi.getBrand(brandPojo.getBrand()));
+        }else if(brandPojo.getCategory()!=""){
+            return convertBrandPojoListToMap(brandApi.getCategory(brandPojo.getCategory()));
         }else{
-            return brandApiService.getAll();
+            return convertBrandPojoListToMap(brandApi.getAll());
         }
     }
 
+    public static Map<Integer, List<Object>> convertBrandPojoListToMap(List<BrandPojo> brandPojoList){
+        Map<Integer, List<Object>> brandMap = new HashMap<>();
+        for(BrandPojo brandPojo: brandPojoList){
+            List<Object> values = new ArrayList<>();
+            values.add(brandPojo.getBrand());
+            values.add(brandPojo.getCategory());
+            brandMap.put(brandPojo.getId(), values);
+        }
+        return brandMap;
+    }
+
     @Transactional
-    public ResponseEntity<byte[]> downloadBrandReport(List<BrandReportData> brandReportDataList) throws IOException {
+    public ResponseEntity<byte[]> downloadBrandReport(Map<Integer, List<Object>> brandPojoList) throws IOException {
         StringWriter sw = new StringWriter();
         CSVWriter writer = new CSVWriter(sw);
 
         // Write data to CSV
-        String[] header = {"Id", "Brand", "Category"};
+        String[] header = {"Brand", "Category"};
         writer.writeNext(header);
-        for (BrandReportData brandReportData : brandReportDataList) {
-            String[] data = {String.valueOf(brandReportData.getId()), brandReportData.getBrand(), brandReportData.getCategory()};
+        brandPojoList.forEach((key, value) ->{
+            String[] data = {(String) value.get(0), (String) value.get(1)};
             writer.writeNext(data);
-        }
+        });
         byte[] csvData = sw.toString().getBytes();
 
         // create a ResponseEntity with the CSV data as its body
@@ -85,38 +96,38 @@ public class ReportsFlow {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<InventoryReportData> generateInventoryReport(List<BrandReportData> brandReportDataList) throws ApiException {
-        List<InventoryReportData> inventoryReportDataList = new ArrayList<>();
-        for(BrandReportData brandReportData: brandReportDataList){
-            List<ProductPojo> productPojoList = productApiService.getBrandCategory(brandReportData.getId());
-            int quantity=0;
-            InventoryReportData inventoryReportData = new InventoryReportData();
-            for(ProductPojo productPojo: productPojoList) {
-                InventoryPojo inventoryPojo = inventoryApiService.getByProduct(productPojo.getId());
-                if(inventoryPojo != null){
+    public Map<Integer, Integer> generateInventoryReport(Map<Integer, List<Object>> brandPojoList) throws ApiException {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (Map.Entry<Integer, List<Object>> entry : brandPojoList.entrySet()) {
+            Integer key = entry.getKey();
+            List<Object> value = entry.getValue();
+            List<ProductPojo> productPojoList = productApi.getBrandCategory(key);
+            int quantity = 0, flag = 0;
+            for (ProductPojo productPojo : productPojoList) {
+                InventoryPojo inventoryPojo = inventoryApi.getByProduct(productPojo.getId());
+                if (inventoryPojo != null) {
                     quantity += inventoryPojo.getQuantity();
-                    inventoryReportData = convertInventoryReport(quantity, brandReportData);
+                    flag = 1;
                 }
             }
-            if(inventoryReportData.getBrand()==null){
-                continue;
+            if (flag != 0) {
+                map.put(key, quantity);
             }
-            inventoryReportDataList.add(inventoryReportData);
+
         }
-        return inventoryReportDataList;
+        return map;
     }
     @Transactional
-    public ResponseEntity<byte[]> downloadInventoryReport(List<InventoryReportData> inventoryReportDataList) throws IOException {
+    public ResponseEntity<byte[]> downloadInventoryReport( Map<Integer, List<Object>> brandMap, Map<Integer, Integer> inventoryMap) throws IOException {
         StringWriter sw = new StringWriter();
         CSVWriter writer = new CSVWriter(sw);
-
         // Write data to CSV
         String[] header = {"Brand", "Category", "Quantity"};
         writer.writeNext(header);
-        for (InventoryReportData inventoryReportData : inventoryReportDataList) {
-            String[] data = { inventoryReportData.getBrand(), inventoryReportData.getCategory(), String.valueOf(inventoryReportData.getQuantity())};
+        inventoryMap.forEach((key, value)->{
+            String[] data = {(String) brandMap.get(key).get(0), (String) brandMap.get(key).get(1), String.valueOf(value)};
             writer.writeNext(data);
-        }
+        });
         byte[] csvData = sw.toString().getBytes();
 
         // create a ResponseEntity with the CSV data as its body
@@ -126,36 +137,41 @@ public class ReportsFlow {
         ResponseEntity<byte[]> response = new ResponseEntity<>(csvData, headers, HttpStatus.OK);
         return response;
     }
-    protected InventoryReportData convertInventoryReport(Integer quantity, BrandReportData brandReportData){
-        InventoryReportData inventoryReportData = new InventoryReportData();
-        inventoryReportData.setQuantity(quantity);
-        inventoryReportData.setBrand(brandReportData.getBrand());
-        inventoryReportData.setCategory(brandReportData.getCategory());
-        return inventoryReportData;
-    }
+
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<OrderPojo> getSalesReportOrderList(SalesReportForm form) throws ApiException {
-        ZonedDateTime startDate = LocalDate.parse(form.getStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay(ZoneOffset.UTC);
-        ZonedDateTime endDate = LocalDate.parse(form.getEndDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay(ZoneOffset.UTC).plusDays(1).minusSeconds(1);
-        return orderApiService.getOrderByDate(startDate, endDate);
-    }
-
-    @Transactional(rollbackFor = ApiException.class)
-    public HashMap<Integer, Pair<Integer, Double>> getSalesReportProductList(List<OrderPojo> orderPojoList) throws ApiException {
-        HashMap<Integer, Pair<Integer, Double>> map=new HashMap<Integer,Pair<Integer, Double>>();
+    public List<OrderPojo> getSalesReportOrderList(String sDate, String eDate) throws ApiException {
+        ZonedDateTime startDate = LocalDate.parse(sDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay(ZoneOffset.UTC);
+        ZonedDateTime endDate = LocalDate.parse(eDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay(ZoneOffset.UTC).plusDays(1).minusSeconds(1);
+        List<OrderPojo> orderPojoList = orderApi.getOrderByDate(startDate, endDate);
+        List<OrderPojo> newOrderPojoList = new ArrayList<>();
         for(OrderPojo orderPojo: orderPojoList){
-            List<OrderItemPojo> orderItems = orderItemApiService.getByOrderId(orderPojo.getId());
+            if(orderPojo.getIsInvoiceGenerated() == true){
+                newOrderPojoList.add(orderPojo);
+            }
+        }
+        return newOrderPojoList;
+    }
+
+    @Transactional(rollbackFor = ApiException.class)
+    public Map<Integer, List<Object>> getSalesReportProductList(List<OrderPojo> orderPojoList) throws ApiException {
+        Map<Integer, List<Object>> map=new HashMap<>();
+        for(OrderPojo orderPojo: orderPojoList){
+            List<OrderItemPojo> orderItems = orderItemApi.getByOrderId(orderPojo.getId());
             for(OrderItemPojo orderItemPojo: orderItems){
                 int productId = orderItemPojo.getProductId();
                 if(map.containsKey(productId)){
-                    Integer newQuantity = orderItemPojo.getQuantity()+ map.get(productId).getKey();
-                    Double newPrice = orderItemPojo.getSellingPrice()+ map.get(productId).getValue();
-                    Pair<Integer, Double> P = new Pair<>(newQuantity, newPrice);
-                    map.put(productId, P);
+                    Integer newQuantity = orderItemPojo.getQuantity()+ (Integer) map.get(productId).get(0);
+                    Double newRevenue = orderItemPojo.getQuantity()*orderItemPojo.getSellingPrice()+ (Double) map.get(productId).get(1);
+                   List<Object> values = new ArrayList<>();
+                   values.add(newQuantity);
+                   values.add(newRevenue);
+                    map.put(productId, values);
                 }else{
-                    Pair<Integer, Double> P = new Pair<>(orderItemPojo.getQuantity(), orderItemPojo.getSellingPrice());
-                    map.put(productId, P);
+                    List<Object> values = new ArrayList<>();
+                    values.add(orderItemPojo.getQuantity());
+                    values.add(orderItemPojo.getQuantity()*orderItemPojo.getSellingPrice());
+                    map.put(productId, values);
                 }
             }
         }
@@ -163,38 +179,44 @@ public class ReportsFlow {
     }
 
     @Transactional(rollbackFor = ApiException.class)
-    public List<SalesReportData> getSalesReportData(List<BrandReportData> brandReportDataList,  HashMap<Integer, Pair<Integer, Double>> map) throws ApiException {
-        List<SalesReportData> salesReportDataList = new ArrayList<>();
-        for(BrandReportData brandReportData: brandReportDataList){
-            List<ProductPojo> productPojoList = productApiService.getBrandCategory(brandReportData.getId());
-            for(ProductPojo productPojo: productPojoList){
-                SalesReportData tempData = new SalesReportData();
+    public  Map<Integer, List<Object>> getSalesReportData(Map<Integer, List<Object>> brandMap, Map<Integer, List<Object>> salesReportProductList) throws ApiException {
+        Map<Integer, List<Object>> salesMap = new HashMap<>();
+        for (Map.Entry<Integer, List<Object>> entry : brandMap.entrySet()) {
+            Integer key = entry.getKey();
+            List<Object> value = entry.getValue();
+            List<ProductPojo> productPojoList = productApi.getBrandCategory(key);
+            int quantity = 0, flag = 0;
+            double revenue = 0;
+            for (ProductPojo productPojo : productPojoList) {
                 int prodId = productPojo.getId();
-                if(map.containsKey(prodId)){
-                    tempData.setBrand(brandReportData.getBrand());
-                    tempData.setCategory(brandReportData.getCategory());
-                    tempData.setQuantity(map.get(prodId).getKey());
-                    tempData.setRevenue(map.get(prodId).getValue());
-                    salesReportDataList.add(tempData);
+                if (salesReportProductList.containsKey(prodId)) {
+                    flag = 1;
+                    quantity += (Integer) salesReportProductList.get(prodId).get(0);
+                    revenue += (Double) salesReportProductList.get(prodId).get(1);
                 }
-
+            }
+            if (flag == 1) {
+                List<Object> values = new ArrayList<>();
+                values.add(quantity);
+                values.add(revenue);
+                salesMap.put(key, values);
             }
         }
-        return salesReportDataList;
+        return salesMap;
     }
 
     @Transactional
-    public ResponseEntity<byte[]> downloadSalesReport(List<SalesReportData> salesReportDataList) throws IOException {
+    public ResponseEntity<byte[]> downloadSalesReport(Map<Integer, List<Object>> salesMap, Map<Integer, List<Object>> brandMap) throws IOException {
         StringWriter sw = new StringWriter();
         CSVWriter writer = new CSVWriter(sw);
 
         // Write data to CSV
         String[] header = {"Brand", "Category", "Quantity", "Revenue"};
         writer.writeNext(header);
-        for (SalesReportData salesReportData : salesReportDataList) {
-            String[] data = { salesReportData.getBrand(), salesReportData.getCategory(), String.valueOf(salesReportData.getQuantity()),String.valueOf(salesReportData.getRevenue())};
+        salesMap.forEach((key, value) -> {
+            String[] data = {(String) brandMap.get(key).get(0), (String) brandMap.get(key).get(1), String.valueOf(value.get(0)),String.valueOf(value.get(1))};
             writer.writeNext(data);
-        }
+        });
         byte[] csvData = sw.toString().getBytes();
 
         // create a ResponseEntity with the CSV data as its body
@@ -210,7 +232,7 @@ public class ReportsFlow {
         ZonedDateTime startDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).minusDays(1);
         ZonedDateTime endDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).minusSeconds(1);
         System.out.println("Report Generated at "+ LocalDate.now());
-        List<OrderPojo> orderPojoList =  orderApiService.getOrderByDate(startDate, endDate);
+        List<OrderPojo> orderPojoList =  orderApi.getOrderByDate(startDate, endDate);
         List<OrderPojo> newOrderPojoList = new ArrayList<>();
         for(OrderPojo orderPojo: orderPojoList){
             if(orderPojo.getIsInvoiceGenerated()){
@@ -220,15 +242,16 @@ public class ReportsFlow {
         return newOrderPojoList;
     }
     @Transactional
-    public ResponseEntity<byte[]> downloadDailyReport(List<DailyReportData> dailyReportDataList) throws IOException {
+    public ResponseEntity<byte[]> downloadDailyReport() throws IOException {
+        List<DailyReportPojo> dailyPojoList = dailyReportApi.getAll();
         StringWriter sw = new StringWriter();
         CSVWriter writer = new CSVWriter(sw);
 
         // Write data to CSV
         String[] header = {"Date", "Invoiced Orders", "Invoiced Items", "Total Revenue"};
         writer.writeNext(header);
-        for (DailyReportData dailyReportData : dailyReportDataList) {
-            String[] data = { dailyReportData.getDate(), String.valueOf(dailyReportData.getInvoiced_orders_count()),String.valueOf(dailyReportData.getInvoiced_items_count()),String.valueOf(dailyReportData.getTotal_revenue())};
+        for (DailyReportPojo dailyReportPojo : dailyPojoList) {
+            String[] data = { String.valueOf(dailyReportPojo.getDate().withZoneSameInstant(ZoneId.of("UTC") )), String.valueOf(dailyReportPojo.getInvoiced_orders_count()),String.valueOf(dailyReportPojo.getInvoiced_items_count()),String.valueOf(dailyReportPojo.getTotal_revenue())};
             writer.writeNext(data);
         }
         byte[] csvData = sw.toString().getBytes();
