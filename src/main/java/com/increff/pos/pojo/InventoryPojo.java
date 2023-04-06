@@ -9,14 +9,14 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name="Inventory",
-        indexes = {  @Index(name = "quantity", columnList = "quantity") },
         uniqueConstraints ={@UniqueConstraint(columnNames = {"productId"})}
 
 )
 public class InventoryPojo {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "inventory_generator")
+    @TableGenerator(name = "inventory_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "inventory_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
     @Column(nullable = false, updatable = false)
     private Integer productId;

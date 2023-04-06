@@ -9,8 +9,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name="Users",
-		indexes = { @Index(name = "email", columnList = "email"),
-				@Index(name = "role", columnList = "role"),
+		indexes = { @Index(name = "role", columnList = "role"),
 				@Index(name = "email_pass", columnList = "email, password")
 		}
 
@@ -18,9 +17,10 @@ import javax.persistence.*;
 public class UserPojo {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "user_generator")
+	@TableGenerator(name = "user_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "user_id", initialValue = 1000, allocationSize = 1)
 	private Integer id;
-	@Column(unique=true, nullable = false)
+	@Column(unique=true, nullable = false) // UNIQUE KEY CHCEK KR LENA
 	private String email;
 	@Column(nullable = false)
 	private String password;

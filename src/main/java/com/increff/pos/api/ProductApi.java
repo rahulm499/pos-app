@@ -1,4 +1,4 @@
-package com.increff.pos.service;
+package com.increff.pos.api;
 
 import com.increff.pos.dao.ProductDao;
 import com.increff.pos.pojo.ProductPojo;
@@ -14,17 +14,15 @@ public class ProductApi {
     private ProductDao dao;
 
     //validation checks need to be updated
-    @Transactional(rollbackFor = ApiException.class)
-    public void add(ProductPojo p) throws ApiException {
+    @Transactional
+    public void add(ProductPojo p){
        dao.insert(p);
     }
 
-    @Transactional(rollbackFor = ApiException.class)
-    public ProductPojo get(Integer id) throws ApiException {
-        return getCheck(id);
+    public ProductPojo get(Integer id){
+        return dao.select(id);
     }
 
-    @Transactional
     public List<ProductPojo> getAll() {
         return dao.selectAll();
     }
@@ -36,7 +34,6 @@ public class ProductApi {
         ex.setMrp(p.getMrp());
     }
 
-    @Transactional
     public ProductPojo getCheck(Integer id) throws ApiException {
         ProductPojo p = dao.select(id);
         if (p == null) {
@@ -44,7 +41,6 @@ public class ProductApi {
         }
         return p;
     }
-    @Transactional
     public ProductPojo getCheckBarcode(String barcode) throws ApiException {
         ProductPojo p = dao.selectByBarcode(barcode);
         if (p == null) {
@@ -59,7 +55,6 @@ public class ProductApi {
         }
     }
 
-    @Transactional
     public  List<ProductPojo> getBrandCategory(Integer brand_category) throws ApiException {
         List<ProductPojo> p = dao.selectByBrandCategory(brand_category);
         if (p == null) {

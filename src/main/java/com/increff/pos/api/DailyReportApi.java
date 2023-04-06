@@ -1,4 +1,4 @@
-package com.increff.pos.service;
+package com.increff.pos.api;
 
 import com.increff.pos.dao.DailyReportDao;
 import com.increff.pos.pojo.DailyReportPojo;
@@ -19,7 +19,6 @@ public class DailyReportApi {
         dao.insert(p);
     }
 
-    @Transactional(rollbackOn = ApiException.class)
     public List<DailyReportPojo> getAll(){
         return dao.selectAll();
     }

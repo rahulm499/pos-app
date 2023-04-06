@@ -4,7 +4,7 @@ package com.increff.pos.controller;
 import com.increff.pos.dto.ProductDto;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
+
+import static com.increff.pos.helper.ResponseHelperUtil.setAddBulkHeaders;
 
 @Api
 @RestController
@@ -22,16 +23,16 @@ public class ProductController {
     @Autowired
     private ProductDto dto;
 
-    @ApiOperation(value= "Adds a Product")
+    @ApiOperation(value = "Adds a Product")
     @RequestMapping(path = "/api/product", method = RequestMethod.POST)
     public void add(@RequestBody ProductForm form) throws ApiException {
         dto.add(form);
     }
 
-    @ApiOperation(value= "Adds list of Products")
+    @ApiOperation(value = "Adds list of Products")
     @RequestMapping(path = "/api/product/upload", method = RequestMethod.POST)
-    public ResponseEntity<byte[]> addBulk(@RequestParam("file") MultipartFile file) throws ApiException, IOException, IllegalAccessException {
-        return dto.addBulk(file);
+    public ResponseEntity<byte[]> addBulk(@RequestParam("file") MultipartFile file) throws ApiException {
+        return setAddBulkHeaders(dto.addBulk(file));
     }
 
     @ApiOperation(value = "Gets a product by ID")

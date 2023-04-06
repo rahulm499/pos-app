@@ -15,7 +15,8 @@ import javax.persistence.*;
 )
 public class ProductPojo {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "product_generator")
+    @TableGenerator(name = "product_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "product_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
     @Column(unique=true, nullable = false)
     private String barcode;

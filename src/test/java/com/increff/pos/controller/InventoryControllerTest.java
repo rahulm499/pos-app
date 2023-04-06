@@ -7,19 +7,18 @@ import com.increff.pos.model.data.InventoryData;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.testUtilHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class InventoryControllerTest extends AbstractUnitTest {
     @Autowired
@@ -73,18 +72,18 @@ public class InventoryControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testSadPathAddInventoryBarcodeEmpty() throws ApiException {
+    public void testSadPathAddInventoryBarcodeEmpty(){
         try{controller.add(testUtilHelper.getDummyInventoryForm("", 1000));}
         catch(ApiException e){ assertEquals("Barcode cannot be empty", e.getMessage());}
     }
     @Test
-    public void testSadPathAddInventoryQuantityEmpty() throws ApiException {
+    public void testSadPathAddInventoryQuantityEmpty(){
         try{controller.add(testUtilHelper.getDummyInventoryForm("bar1", 0));}
         catch(ApiException e){ assertEquals("Quantity cannot be less than 0", e.getMessage());}
     }
 
     @Test
-    public void testSadPathAddInventoryProductNotExists() throws ApiException {
+    public void testSadPathAddInventoryProductNotExists(){
         try{controller.add(testUtilHelper.getDummyInventoryForm("bar3", 1000));}
         catch(ApiException e){ assertEquals("Product with given barcode does not exists, Barcode: " + "bar3", e.getMessage());}
     }
@@ -147,7 +146,7 @@ public class InventoryControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
+    public void testAddBulk() throws ApiException {
         MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "barcode\tquantity\nbar1\t100".getBytes());
         controller.addBulk(mockFile);
         List<InventoryData> inventoryDataList = controller.getAll();
@@ -155,7 +154,7 @@ public class InventoryControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testSadPathAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
+    public void testSadPathWrongHeadingAddBulk(){
         // Call the method that handles the multipart request
         // Pass in the mocked HttpServletRequest object
         try {
@@ -164,6 +163,13 @@ public class InventoryControllerTest extends AbstractUnitTest {
         }catch (ApiException e){
             assertEquals("Invalid data headings", e.getMessage());
         }
+    }
+
+    @Test
+    public void testSadPathWrongDataAddBulk() throws ApiException {
+        MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "barcode\tquantity\nbaradda1\t100".getBytes());
+        ResponseEntity<byte[]> data = controller.addBulk(mockFile);
+        assertNotEquals(0, data.toString().length());
     }
 
 }

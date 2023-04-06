@@ -1,4 +1,4 @@
-package com.increff.pos.service;
+package com.increff.pos.api;
 
 import com.increff.pos.dao.BrandDao;
 import com.increff.pos.pojo.BrandPojo;
@@ -20,12 +20,10 @@ public class BrandApi {
 		dao.insert(brandPojo);
 	}
 
-	@Transactional
-	public BrandPojo get(Integer id) throws ApiException {
-		return getCheck(id);
+	public BrandPojo get(Integer id){
+		return dao.select(id);
 	}
 
-	@Transactional
 	public List<BrandPojo> getAll() {
 		return dao.selectAll();
 	}
@@ -41,7 +39,6 @@ public class BrandApi {
 		ex.setBrand(brandPojo.getBrand());
 	}
 
-	@Transactional
 	public BrandPojo getCheck(Integer id) throws ApiException {
 		BrandPojo p = dao.select(id);
 		if (p == null) {
@@ -49,7 +46,6 @@ public class BrandApi {
 		}
 		return p;
 	}
-	@Transactional
 	public BrandPojo getCheckBrandCategory(String brand, String category) throws ApiException {
 		BrandPojo brandPojo = dao.selectByBrandCategory(brand, category);
 		if(brandPojo == null){
@@ -58,17 +54,14 @@ public class BrandApi {
 		return brandPojo;
 	}
 
-	@Transactional
-	public BrandPojo getByBrandCategory(String brand, String category) throws ApiException {
+	public BrandPojo getByBrandCategory(String brand, String category){
 		return dao.selectByBrandCategory(brand, category);
 	}
 
-	@Transactional
-	public List<BrandPojo> getCategory(String category) throws ApiException {
+	public List<BrandPojo> getCategory(String category){
 		return dao.selectByCategory(category);
 	}
-	@Transactional
-	public List<BrandPojo> getBrand(String brand) throws ApiException {
+	public List<BrandPojo> getBrand(String brand) {
 		return dao.selectByBrand(brand);
 
 	}

@@ -8,28 +8,25 @@ import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.model.form.SalesReportForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.DailyReportPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ReportsHelperUtil {
-    public static BrandReportData convertBrandReport(List<Object> values, Integer id){
+    public static BrandReportData convertBrandReport(BrandPojo brandPojo){
         BrandReportData d =new BrandReportData();
-        d.setBrand((String) values.get(0));
-        d.setCategory((String) values.get(1));
-        d.setId(id);
+        d.setBrand(brandPojo.getBrand());
+        d.setCategory(brandPojo.getCategory());
+        d.setId(brandPojo.getId());
         return d;
     }
-    public static List<BrandReportData> covertBrandReport(Map<Integer, List<Object>> brandMap){
+    public static List<BrandReportData> covertBrandReport(List<BrandPojo> brandPojoList){
         List<BrandReportData> brandReportData = new ArrayList<>();
-        brandMap.forEach((key, value) -> {
-            brandReportData.add(convertBrandReport(value, key));
+        brandPojoList.forEach((brandPojo) -> {
+            brandReportData.add(convertBrandReport(brandPojo));
         });
         return brandReportData;
     }
@@ -39,17 +36,7 @@ public class ReportsHelperUtil {
        brandPojo.setCategory(form.getCategory());
         return brandPojo;
     }
-    public static List<BrandPojo> convertBrandReport(List<BrandReportData> brandReportDataList){
-        List<BrandPojo> brandPojoList = new ArrayList<>();
-        for(BrandReportData brandReportData: brandReportDataList){
-            BrandPojo brandPojo = new BrandPojo();
-            brandPojo.setBrand(brandReportData.getBrand());
-            brandPojo.setCategory(brandReportData.getCategory());
-            brandPojo.setId(brandReportData.getId());
-            brandPojoList.add(brandPojo);
-        }
-        return brandPojoList;
-    }
+
     public static DailyReportData convertDailyReport(DailyReportPojo p){
         DailyReportData d = new DailyReportData();
         d.setDate(String.valueOf(p.getDate().withZoneSameInstant(ZoneId.of("UTC") )));
@@ -67,62 +54,41 @@ public class ReportsHelperUtil {
         return dailyReportPojo;
     }
 
-    public static  Map<BrandPojo, Integer> convertInventoryReport(List<InventoryReportData> inventoryReportDataList){
-        Map<BrandPojo, Integer> map = new HashMap<>();
-        for(InventoryReportData inventoryReportData: inventoryReportDataList){
-            BrandPojo brandPojo = new BrandPojo();
-            brandPojo.setBrand(inventoryReportData.getBrand());
-            brandPojo.setCategory(inventoryReportData.getCategory());
-            map.put(brandPojo, inventoryReportData.getQuantity());
-        }
-        return map;
-    }
-    public static InventoryReportData convertInventoryReport(Integer quantity, List<Object> brandData){
+
+    public static InventoryReportData convertInventoryReport(Integer quantity, BrandPojo brandPojo){
         InventoryReportData inventoryReportData = new InventoryReportData();
         inventoryReportData.setQuantity(quantity);
-        inventoryReportData.setBrand((String) brandData.get(0));
-        inventoryReportData.setCategory((String) brandData.get(1));
+        inventoryReportData.setBrand(brandPojo.getBrand());
+        inventoryReportData.setCategory(brandPojo.getCategory());
         return inventoryReportData;
     }
 
-    public static List<SalesReportData> convertSalesReport(Map<Integer, List<Object>> salesMap, Map<Integer, List<Object>> brandMap){
+    public static List<SalesReportData> convertSalesReport( Map<Integer, Double> salesProductQuantityMap, Map<Integer, Double> salesProductRevenueMap,
+                                                            List<BrandPojo> brandPojoList){
         List<SalesReportData> salesReportDataList = new ArrayList<>();
-        salesMap.forEach((key, value) ->{
-            SalesReportData salesReportData = new SalesReportData();
-            salesReportData.setBrand((String) brandMap.get(key).get(0));
-            salesReportData.setCategory((String) brandMap.get(key).get(1));
-            salesReportData.setQuantity((Integer) value.get(0));
-            salesReportData.setRevenue((Double) value.get(1));
-            salesReportDataList.add(salesReportData);
-        });
-        return salesReportDataList;
-    }
-    public static Map<BrandPojo, List<Object>> convertSalesReport(List<SalesReportData> salesReportDataList){
-        Map<BrandPojo, List<Object>> salesMap = new HashMap<>();
-        for(SalesReportData salesReportData: salesReportDataList){
-            List<Object> values = new ArrayList<>();
-            BrandPojo brandPojo = new BrandPojo();
-            brandPojo.setBrand(salesReportData.getBrand());
-            brandPojo.setCategory(salesReportData.getCategory());
-            values.add(salesReportData.getQuantity());
-            values.add(salesReportData.getRevenue());
-            salesMap.put(brandPojo, values);
+        for(BrandPojo brandPojo: brandPojoList){
+            if(salesProductQuantityMap.containsKey(brandPojo.getId())) {
+                SalesReportData salesReportData = new SalesReportData();
+                salesReportData.setBrand((brandPojo.getBrand()));
+                salesReportData.setCategory(brandPojo.getCategory());
+                salesReportData.setQuantity(salesProductQuantityMap.get(brandPojo.getId()).intValue());
+                salesReportData.setRevenue(salesProductRevenueMap.get(brandPojo.getId()));
+                salesReportDataList.add(salesReportData);
+            }
         }
-        return salesMap;
+        return salesReportDataList;
     }
 
 
     public static void validateSalesReport(SalesReportForm form) throws ApiException {
-        if(form.getStartDate()==""){
+        if(Objects.equals(form.getStartDate(), "")){
             throw new ApiException("Start Date cannot be empty");
-        }else if(form.getEndDate()==""){
+        }else if(Objects.equals(form.getEndDate(), "")){
             throw new ApiException("End Date cannot be empty");
         }else if(LocalDate.parse(form.getEndDate()).isBefore(LocalDate.parse(form.getStartDate()))){
             throw new ApiException("End Date cannot be before start date");
         }
     }
-
-
 
 
 }

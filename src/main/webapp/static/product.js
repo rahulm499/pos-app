@@ -204,11 +204,13 @@ function downloadErrors(){
 function displayProductList(data){
 	var $tbody = $('#product-table').find('tbody');
 	$tbody.empty();
+	var index=0
 	for(var i in data){
+	    index++;
 		var e = data[i];
 		var buttonHtml = ' <button onclick="displayEditProduct(' + e.id + ')" class="btn btn-outline-dark custom-button edit-button mx-auto" data-toggle="tooltip" data-placement="top" title="Edit Product"><i class="material-icons">edit</i></button>'
 		var row = '<tr>'
-		+ '<th scope="row">' + e.id + '</th>'
+		+ '<th scope="row">' + index+ '</th>'
 		+ '<td>' + e.barcode + '</td>'
 		+ '<td>'  + e.brandName + '</td>'
 		+ '<td>' + e.brandCategory + '</td>'

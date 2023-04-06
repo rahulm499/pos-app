@@ -7,34 +7,35 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class SiteUiController extends AbstractUiController {
 
-	// WEBSITE PAGES
-	@RequestMapping(value = "")
-	public ModelAndView index() {
-		return mav("index.html");
-	}
+    // WEBSITE PAGES
+    @RequestMapping(value = "")
+    public ModelAndView index() {
+        return mav("index.html");
+    }
 
-	@RequestMapping(value = "/site/login")
-	public ModelAndView login() {
-		return mav("login.html");
-	}
-	@RequestMapping(value = "/site/signup")
-	public ModelAndView signup() {
-		return mav("signup.html");
-	}
+    @RequestMapping(value = "/site/login")
+    public ModelAndView login() {
+        return mav("login.html");
+    }
 
-	@RequestMapping(value = "/site/logout")
-	public ModelAndView logout() {
-		return mav("logout.html");
-	}
+    @RequestMapping(value = "/site/signup")
+    public ModelAndView signup() {
+        return mav("signup.html");
+    }
 
-	@RequestMapping(value = "/site/pricing")
-	public ModelAndView pricing() {
-		return mav("pricing.html");
-	}
+    @RequestMapping(value = "/site/logout")
+    public ModelAndView logout() {
+        return mav("logout.html");
+    }
 
-	@RequestMapping(value = "/site/features")
-	public ModelAndView features() {
-		return mav("features.html");
-	}
+    @RequestMapping(value = "/site/pricing")
+    public ModelAndView pricing() {
+        return mav("pricing.html");
+    }
+
+    @RequestMapping(value = "/site/features")
+    public ModelAndView features() {
+        return mav("features.html");
+    }
 
 }

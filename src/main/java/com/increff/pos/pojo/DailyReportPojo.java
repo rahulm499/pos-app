@@ -9,13 +9,12 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name="DailyReport",
-        indexes = {}
-
+@Table(name="DailyReport"
 )
 public class DailyReportPojo {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "daily_report_generator")
+    @TableGenerator(name = "daily_report_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "daily_report_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
 
     @Column(nullable = false, unique = true)

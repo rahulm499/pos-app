@@ -3,19 +3,18 @@ package com.increff.pos.controller;
 import com.increff.pos.AbstractUnitTest;
 import com.increff.pos.model.data.BrandData;
 import com.increff.pos.model.form.BrandForm;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.testUtilHelper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertNotEquals;
+
 
 
 public class BrandControllerTest extends AbstractUnitTest {
@@ -47,15 +46,17 @@ public class BrandControllerTest extends AbstractUnitTest {
     }
 
     @Test //Sad Path
-    public void testSadPathAddBrandNameEmpty() throws ApiException {
-        try {controller.add(testUtilHelper.getDummyBrandForm("", "cAtEgOry2"));} catch (ApiException e) {
+    public void testSadPathAddBrandNameEmpty(){
+        try {
+            controller.add(testUtilHelper.getDummyBrandForm("", "cAtEgOry2"));
+        } catch (ApiException e) {
             assertEquals("Brand cannot be empty", e.getMessage());}
 
         try {controller.add(new BrandForm());} catch (ApiException e) {
             assertEquals("Brand cannot be empty", e.getMessage());}
     }
     @Test //Sad Path
-    public void testSadPathAddBrandCategoryEmpty() throws ApiException {
+    public void testSadPathAddBrandCategoryEmpty(){
         // Brand Category Empty
         try {controller.add(testUtilHelper.getDummyBrandForm("brand1", ""));} catch (ApiException e) {
             assertEquals("Category cannot be empty", e.getMessage());}
@@ -63,7 +64,7 @@ public class BrandControllerTest extends AbstractUnitTest {
     }
 
     @Test //Sad Path
-    public void testSadPathAddBrandCategoryExists() throws ApiException {
+    public void testSadPathAddBrandCategoryExists() {
         // Unique check
         try {controller.add(testUtilHelper.getDummyBrandForm("brand1", "category1"));
             controller.add(testUtilHelper.getDummyBrandForm("brand1", "category1"));} catch (ApiException e) {
@@ -155,7 +156,7 @@ public class BrandControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
+    public void testAddBulk() throws ApiException {
         MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "brand\tcategory\nbrand\tcategory\nbrand2\tcategory2".getBytes());
         controller.addBulk(mockFile);
         List<BrandData> brandDataList = controller.getAll();
@@ -163,15 +164,19 @@ public class BrandControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testSadPathAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
-        // Call the method that handles the multipart request
-        // Pass in the mocked HttpServletRequest object
+    public void testSadPathWrongHeadingAddBulk(){
         try {
             MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "brand\tcat\nbrand\tcategory\nbrand2\tcategory2".getBytes());
             controller.addBulk(mockFile);
         }catch (ApiException e){
             assertEquals("Invalid data headings", e.getMessage());
         }
+    }
+    @Test
+    public void testSadPathWrongDataAddBulk() throws ApiException {
+            MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "brand\tcategory\nbrand\tcategory\nbrand\tcategory".getBytes());
+            ResponseEntity<byte[]> data =controller.addBulk(mockFile);
+            assertNotEquals(0, data.toString().length());
     }
 
 }

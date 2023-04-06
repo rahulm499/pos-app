@@ -3,20 +3,39 @@ package com.increff.pos.helper;
 import com.increff.pos.model.data.*;
 import com.increff.pos.model.form.UserForm;
 import com.increff.pos.pojo.UserPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.util.StringUtil;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UserHelperUtil {
-    public static UserPojo convertUserForm(UserForm userForm, String role) throws IOException {
+
+
+    public static String getRole(String email) throws ApiException {
+        Properties emailProperties = new Properties();
+        try {
+            emailProperties.load(new FileInputStream("email.properties"));
+        } catch (IOException e) {
+            throw new ApiException("Unable to determine role of user");
+        }
+        for (String emailProp : emailProperties.stringPropertyNames()) {
+            if (Objects.equals(email, emailProp)) {
+                return "supervisor";
+            }
+        }
+        return "operator";
+    }
+    public static UserPojo convertUserForm(UserForm userForm, String role){
         UserPojo userPojo = convertUserUpdateForm(userForm, role);
         userPojo.setPassword(userForm.getPassword());
         return userPojo;
     }
-    public static UserPojo convertUserUpdateForm(UserForm userForm, String role) throws IOException {
+    public static UserPojo convertUserUpdateForm(UserForm userForm, String role){
         UserPojo userPojo = new UserPojo();
         userPojo.setEmail(userForm.getEmail());
         if(userForm.getRole()==null || userForm.getRole().isEmpty()){

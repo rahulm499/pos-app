@@ -1,6 +1,5 @@
 package com.increff.pos.spring;
 
-import com.increff.pos.service.ApiException;
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

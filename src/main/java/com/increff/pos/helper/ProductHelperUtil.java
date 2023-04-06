@@ -1,18 +1,13 @@
 package com.increff.pos.helper;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.increff.pos.model.data.ErrorData;
 import com.increff.pos.model.data.ProductData;
-import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.model.form.ProductForm;
+import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.util.StringUtil;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -23,14 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductHelperUtil {
-    public static ProductData convertProduct(List<Object> values) {
+    public static ProductData convertProduct(ProductPojo productPojo, BrandPojo brandPojo) {
         ProductData data =new ProductData();
-        data.setId((Integer) values.get(0));
-        data.setName((String) values.get(1));
-        data.setBarcode((String) values.get(2));
-        data.setMrp((Double) values.get(3));
-        data.setBrandName((String) values.get(4));
-        data.setBrandCategory((String) values.get(5));
+        data.setId(productPojo.getId());
+        data.setName(productPojo.getName());
+        data.setBarcode(productPojo.getBarcode());
+        data.setMrp(productPojo.getMrp());
+        data.setBrandName(brandPojo.getBrand());
+        data.setBrandCategory(brandPojo.getCategory());
         return data;
     }
 
@@ -140,7 +135,7 @@ public class ProductHelperUtil {
         return productFormList;
     }
 
-    public static ResponseEntity<byte[]> convertToTSVFile(List<ErrorData> productErrorDataList) throws IllegalAccessException, IOException {
+    public static ByteArrayOutputStream convertToTSVFile(List<ErrorData> productErrorDataList) throws ApiException {
         StringBuilder tsvData = new StringBuilder();
 
         // Append the header row (if any)
@@ -161,20 +156,15 @@ public class ProductHelperUtil {
         }
         // create a byte array output stream and write the TSV data to it
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        outputStream.write(tsvData.toString().getBytes());
-
-        // create headers for the response
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("filename", "data.tsv");
-
-        // Create response entity
-        ResponseEntity<byte[]> response = new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
-
-        return response;
+        try {
+            outputStream.write(tsvData.toString().getBytes());
+        }catch (IOException e){
+            throw new ApiException("Unable to convert Data to TSV file");
+        }
+        return outputStream;
 
     }
-    protected static void vaidateHeadings(String[] data) throws ApiException {
+    private static void vaidateHeadings(String[] data) throws ApiException {
         if(!data[0].equals("name") || !data[1].equals("brandName") || !data[2].equals("brandCategory") || !data[3].equals("barcode") || !data[4].equals("mrp")){
             throw new ApiException("Invalid data headings");
         }

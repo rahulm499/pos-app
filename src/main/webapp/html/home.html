@@ -8,7 +8,7 @@
 
 <nav th:replace="snippets.html :: name_app_navbar"></nav>
 
-<div class="container">
+<div class="container col-md-9 mt-5">
  <!-- Top row with form-->
 
 	<div class="d-flex flex-wrap flex-row justify-content-around mt-5">
@@ -39,6 +39,20 @@
 				<span class="icon-span-text">Orders</span>
 			</div>
 		</div>
+		<div class="list-item">
+			<a href="#" class="icon-item fas fa-file-alt dropdown-toggle home-toggle home-icon-item" role="button"></a>
+			<div class="icon-text mt-1">
+				<a class="icon-span-text dropdown-toggle home-toggle" href="#" data-toggle="dropdown" role="button" style="color: #212529;">
+					Reports
+				</a>
+				<ul class="dropdown-menu home-menu">
+					<li><a class="dropdown-item" th:href="@{/ui/brand-report}">Brand Report</a></li>
+					<li><a class="dropdown-item" th:href="@{/ui/inventory-report}">Inventory Report</a></li>
+					<li><a class="dropdown-item" th:href="@{/ui/sales-report}">Sales Report</a></li>
+					<li><a class="dropdown-item" th:href="@{/ui/daily-report}">Day on Day Report</a></li>
+				</ul>
+			</div>
+		</div>
 
 		<div class="list-item role">
 			<a th:href="@{/ui/admin}" class="icon-item fas fa-user-cog " role="button"></a>
@@ -47,30 +61,30 @@
 			</div>
 		</div>
 
-		<div class="list-item">
-			<a th:href="@{/ui/brand-report}" class="icon-item fas fa-file-alt" role="button"></a>
-			<div class="icon-text mt-1">
-				<span class="icon-span-text">Brand Report</span>
-			</div>
-		</div>
-		<div class="list-item">
-			<a th:href="@{/ui/inventory-report}" class="icon-item fas fa-file-invoice" role="button"></a>
-			<div class="icon-text mt-1">
-				<span class="icon-span-text">Inventory Report</span>
-			</div>
-		</div>
-		<div class="list-item">
-			<a th:href="@{/ui/sales-report}" class="icon-item fas fa-chart-line" role="button"></a>
-			<div class="icon-text mt-1">
-				<span class="icon-span-text">Sales Report</span>
-			</div>
-		</div>
-		<div class="list-item">
-			<a th:href="@{/ui/daily-report}" class="icon-item fas fa-file-invoice-dollar" role="button"></a>
-			<div class="icon-text mt-1">
-				<span class="icon-span-text">Daily Report</span>
-			</div>
-		</div>
+<!--		<div class="list-item">-->
+<!--			<a th:href="@{/ui/brand-report}" class="icon-item fas fa-file-alt" role="button"></a>-->
+<!--			<div class="icon-text mt-1">-->
+<!--				<span class="icon-span-text">Brand Report</span>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="list-item">-->
+<!--			<a th:href="@{/ui/inventory-report}" class="icon-item fas fa-file-invoice" role="button"></a>-->
+<!--			<div class="icon-text mt-1">-->
+<!--				<span class="icon-span-text">Inventory Report</span>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="list-item">-->
+<!--			<a th:href="@{/ui/sales-report}" class="icon-item fas fa-chart-line" role="button"></a>-->
+<!--			<div class="icon-text mt-1">-->
+<!--				<span class="icon-span-text">Sales Report</span>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<div class="list-item">-->
+<!--			<a th:href="@{/ui/daily-report}" class="icon-item fas fa-file-invoice-dollar" role="button"></a>-->
+<!--			<div class="icon-text mt-1">-->
+<!--				<span class="icon-span-text">Daily Report</span>-->
+<!--			</div>-->
+<!--		</div>-->
 
 	</div>
 
@@ -79,8 +93,27 @@
 </div> <!-- Container end-->
 
 <footer th:replace="snippets.html :: name_footer"></footer>
+<script>
+  $(document).ready(function(){
+    $('.home-toggle').click(function(){
+      $('.home-menu').toggle();
+    });
 
+    $(document).click(function(event) {
+      if(!$(event.target).closest('.home-menu, .home-toggle').length) {
+        if($('.home-menu').is(":visible")) {
+          $('.home-menu').hide();
+        }
+      }
+    });
+  });
+</script>
 
-</body>	
+<style>
+  .home-icon-item::after {
+    display: none;
+  }
+</style>
+</body>
 
 </html>

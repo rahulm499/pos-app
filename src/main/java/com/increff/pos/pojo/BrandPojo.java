@@ -11,15 +11,15 @@ import javax.persistence.*;
 @Entity
 
 @Table(name="Brand",
-        indexes = { @Index(columnList = "brand"),
-                    @Index(columnList = "category")},
+        // We need indexes separately as unique constraints will create combined index for both columns
         uniqueConstraints ={@UniqueConstraint(columnNames = {"brand", "category"})}
 
 )
 public class BrandPojo {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "brand_generator")
+    @TableGenerator(name = "brand_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "brand_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
     @Column(nullable = false)
     private String brand;

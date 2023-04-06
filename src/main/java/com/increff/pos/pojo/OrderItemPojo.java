@@ -11,15 +11,14 @@ import javax.persistence.*;
 @Table(name="OrderItem",
         indexes = { @Index(name = "id", columnList = "id"),
                 @Index(name = "productId", columnList = "productId"),
-                @Index(name = "quantity", columnList = "quantity"),
                 @Index(name = "orderId", columnList = "orderId"),
-                @Index(name = "sellingPrice", columnList = "sellingPrice")
         }
 
 )
 public class OrderItemPojo {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "order_item_generator")
+    @TableGenerator(name = "order_item_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "order_item_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
     @Column(nullable = false)
     private Integer orderId;

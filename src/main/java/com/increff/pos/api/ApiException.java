@@ -1,4 +1,4 @@
-package com.increff.pos.service;
+package com.increff.pos.api;
 
 public class ApiException extends Exception {
 

@@ -16,15 +16,14 @@ import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.BrandPojo;
 import com.increff.pos.pojo.InventoryPojo;
 import com.increff.pos.pojo.ProductPojo;
-import com.increff.pos.service.ApiException;
-import com.increff.pos.service.InvoiceApi;
+import com.increff.pos.api.ApiException;
+import com.increff.pos.api.InvoiceClientApi;
 import com.increff.pos.testUtilHelper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class OrderControllerTest extends AbstractUnitTest {
     @Autowired
     private InventoryDao inventoryDao;
     @Autowired
-    private InvoiceApi invoiceApi;
+    private InvoiceClientApi invoiceClientApi;
 
     @Before
     public void setup() throws JsonProcessingException {
@@ -226,7 +225,7 @@ public class OrderControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testHappyPathUpdateOrder() throws ApiException, JsonProcessingException {
+    public void testHappyPathUpdateOrder() throws ApiException {
         Integer inventory1 = inventoryDao.selectAll().get(0).getQuantity();
         Integer inventory2 = inventoryDao.selectAll().get(1).getQuantity();
         List<OrderItemForm> orderItemFormList = new ArrayList<>();
@@ -503,11 +502,11 @@ public class OrderControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testAddInvoice() throws Exception {
+    public void testAddInvoice() throws ApiException {
         InvoiceClient invoiceClient = Mockito.mock(InvoiceClient.class);
         Mockito.when(invoiceClient.generateInvoice(Mockito.any())).thenReturn(Base64.getEncoder().encodeToString(new byte[12]));
-        invoiceApi.setInvoiceClient(invoiceClient);
-        orderDto.setInvoiceApi(invoiceApi);
+        invoiceClientApi.setInvoiceClient(invoiceClient);
+        orderFlow.setInvoiceClientApi(invoiceClientApi);
         controller.setOrderDto(orderDto);
         List<OrderItemForm> orderItemFormList = new ArrayList<>();
         orderItemFormList.add(testUtilHelper.getOrderItemForm("barcode", 500, 50.0));
@@ -516,11 +515,11 @@ public class OrderControllerTest extends AbstractUnitTest {
         controller.add(form);
         InvoiceForm invoiceForm = new InvoiceForm();
         invoiceForm.setOrderId(controller.getAll().get(0).getId());
-        controller.addInvoice(invoiceForm);
+        controller.generateInvoice(invoiceForm);
         assertEquals(true, controller.getAll().get(0).getIsInvoiceGenerated());
     }
     @Test
-    public void testSadPathAddInvoice() throws Exception {
+    public void testSadPathAddInvoice() throws ApiException {
         List<OrderItemForm> orderItemFormList = new ArrayList<>();
         orderItemFormList.add(testUtilHelper.getOrderItemForm("barcode", 500, 50.0));
         orderItemFormList.add(testUtilHelper.getOrderItemForm("bArcode2", 1000, 100.0));
@@ -529,17 +528,17 @@ public class OrderControllerTest extends AbstractUnitTest {
         InvoiceForm invoiceForm = new InvoiceForm();
         invoiceForm.setOrderId(controller.getAll().get(0).getId());
         try {
-            controller.addInvoice(invoiceForm);
+            controller.generateInvoice(invoiceForm);
         }catch (ApiException e){
             assertEquals("Unable to generate invoice", e.getMessage());
         }
     }
     @Test
-    public void testGetInvoice() throws Exception {
+    public void testGetInvoice() throws ApiException {
         InvoiceClient invoiceClient = Mockito.mock(InvoiceClient.class);
         Mockito.when(invoiceClient.generateInvoice(Mockito.any())).thenReturn(Base64.getEncoder().encodeToString(new byte[12]));
-        invoiceApi.setInvoiceClient(invoiceClient);
-        orderDto.setInvoiceApi(invoiceApi);
+        invoiceClientApi.setInvoiceClient(invoiceClient);
+        orderFlow.setInvoiceClientApi(invoiceClientApi);
         controller.setOrderDto(orderDto);
         List<OrderItemForm> orderItemFormList = new ArrayList<>();
         orderItemFormList.add(testUtilHelper.getOrderItemForm("barcode", 500, 50.0));
@@ -548,7 +547,7 @@ public class OrderControllerTest extends AbstractUnitTest {
         controller.add(form);
         InvoiceForm invoiceForm = new InvoiceForm();
         invoiceForm.setOrderId(controller.getAll().get(0).getId());
-        controller.addInvoice(invoiceForm);
+        controller.generateInvoice(invoiceForm);
         ResponseEntity<byte[]> response= controller.getInvoice(invoiceForm.getOrderId());
         assertNotEquals(0, response.toString().length());
     }

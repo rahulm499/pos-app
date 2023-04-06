@@ -5,11 +5,12 @@ import com.increff.pos.dao.BrandDao;
 import com.increff.pos.model.data.ProductData;
 import com.increff.pos.model.form.ProductForm;
 import com.increff.pos.pojo.BrandPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.testUtilHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 import javax.servlet.ServletException;
@@ -179,7 +180,7 @@ public class ProductControllerTest extends AbstractUnitTest {
     }
 
     @Test
-    public void testSadPathAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
+    public void testSadPathWrongHeadingAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
         // Call the method that handles the multipart request
         // Pass in the mocked HttpServletRequest object
         try {
@@ -188,5 +189,11 @@ public class ProductControllerTest extends AbstractUnitTest {
         }catch (ApiException e){
             assertEquals("Invalid data headings", e.getMessage());
         }
+    }
+    @Test
+    public void testSadPathWrongDataAddBulk() throws ServletException, IOException, ApiException, IllegalAccessException {
+        MockMultipartFile mockFile = new MockMultipartFile("file", "testfile.tsv", "text/tsv", "name\tbrandName\tbrandCategory\tbarcode\tmrp\nbiscuit\tbrancsd1\tcat1\tbis1\t10.00".getBytes());
+        ResponseEntity<byte[]> data = productController.addBulk(mockFile);
+        assertNotEquals(0, data.toString().length());
     }
 }

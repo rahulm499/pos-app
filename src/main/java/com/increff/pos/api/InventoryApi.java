@@ -1,4 +1,4 @@
-package com.increff.pos.service;
+package com.increff.pos.api;
 
 import com.increff.pos.dao.InventoryDao;
 import com.increff.pos.pojo.InventoryPojo;
@@ -14,28 +14,25 @@ public class InventoryApi {
     private InventoryDao dao;
 
     //validation checks need to be updated
-    @Transactional(rollbackOn = ApiException.class)
-    public void add(InventoryPojo p) throws ApiException {
+    @Transactional
+    public void add(InventoryPojo p){
         dao.insert(p);
     }
 
-    @Transactional(rollbackOn = ApiException.class)
-    public InventoryPojo get(Integer id) throws ApiException {
-        return getCheck(id);
+    public InventoryPojo get(Integer id){
+        return dao.select(id);
     }
 
-    @Transactional
     public List<InventoryPojo> getAll() {
         return dao.selectAll();
     }
 
-    @Transactional(rollbackOn  = ApiException.class)
+    @Transactional(rollbackOn = ApiException.class)
     public void update(Integer id, InventoryPojo p) throws ApiException {
         InventoryPojo ex = getCheck(id);
         ex.setQuantity(p.getQuantity());
     }
 
-    @Transactional
     public InventoryPojo getCheck(Integer id) throws ApiException {
         InventoryPojo p = dao.select(id);
         if (p == null) {
@@ -44,12 +41,9 @@ public class InventoryApi {
         return p;
     }
 
-    @Transactional
-    public InventoryPojo getByProduct(Integer id) throws ApiException {
-        InventoryPojo p = dao.selectByProductId(id);
-        return p;
+    public InventoryPojo getByProduct(Integer id) {
+        return dao.selectByProductId(id);
     }
-
 
 
 }

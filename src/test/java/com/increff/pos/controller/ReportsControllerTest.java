@@ -1,6 +1,6 @@
 package com.increff.pos.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.increff.pos.AbstractUnitTest;
 import com.increff.pos.dao.*;
 import com.increff.pos.dto.ReportsDto;
@@ -11,15 +11,13 @@ import com.increff.pos.model.data.SalesReportData;
 import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.model.form.SalesReportForm;
 import com.increff.pos.pojo.*;
-import com.increff.pos.service.ApiException;
-import jdk.nashorn.internal.objects.NativeJSON;
+import com.increff.pos.api.ApiException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -84,6 +82,17 @@ public class ReportsControllerTest extends AbstractUnitTest {
         orderItemPojo.setProductId(productPojo.getId());
         orderItemPojo.setSellingPrice(100.0);
         orderItemDao.insert(orderItemPojo);
+
+        orderPojo = new OrderPojo();
+        orderPojo.setCreated_at(ZonedDateTime.now(ZoneId.of("UTC-4")));
+        orderPojo.setIsInvoiceGenerated(true);
+        orderItemPojo = new OrderItemPojo();
+        orderDao.insert(orderPojo);
+        orderItemPojo.setOrderId(orderPojo.getId());
+        orderItemPojo.setQuantity(1000);
+        orderItemPojo.setProductId(productPojo.getId());
+        orderItemPojo.setSellingPrice(10.0);
+        orderItemDao.insert(orderItemPojo);
     }
 
     @Test
@@ -95,9 +104,40 @@ public class ReportsControllerTest extends AbstractUnitTest {
         assertEquals(1, brandReportDataList.size());
         assertEquals("brand1", brandReportDataList.get(0).getBrand());
         assertEquals("cat1", brandReportDataList.get(0).getCategory());
+
+        brandForm = new BrandForm();
+        brandForm.setBrand("brand1");
+        brandForm.setCategory("");
+        brandReportDataList = controller.generateBrandReport(brandForm);
+        assertEquals(1, brandReportDataList.size());
+        assertEquals("brand1", brandReportDataList.get(0).getBrand());
+        assertEquals("cat1", brandReportDataList.get(0).getCategory());
+
+        brandForm = new BrandForm();
+        brandForm.setBrand("");
+        brandForm.setCategory("cat1");
+        brandReportDataList = controller.generateBrandReport(brandForm);
+        assertEquals(1, brandReportDataList.size());
+        assertEquals("brand1", brandReportDataList.get(0).getBrand());
+        assertEquals("cat1", brandReportDataList.get(0).getCategory());
+
+        brandForm = new BrandForm();
+        brandForm.setBrand("brand1");
+        brandForm.setCategory("cat1");
+        brandReportDataList = controller.generateBrandReport(brandForm);
+        assertEquals(1, brandReportDataList.size());
+        assertEquals("brand1", brandReportDataList.get(0).getBrand());
+        assertEquals("cat1", brandReportDataList.get(0).getCategory());
+
+        brandForm = new BrandForm();
+        brandForm.setBrand("brand2");
+        brandForm.setCategory("cat1");
+        brandReportDataList = controller.generateBrandReport(brandForm);
+        assertEquals(0, brandReportDataList.size());
+
     }
     @Test
-    public void testDownloadBrandReport() throws ApiException, IOException {
+    public void testDownloadBrandReport() throws ApiException {
         BrandForm brandForm = new BrandForm();
         brandForm.setBrand("");
         brandForm.setCategory("");
@@ -117,7 +157,7 @@ public class ReportsControllerTest extends AbstractUnitTest {
         assertEquals(Integer.valueOf(6000), inventoryReportData.get(0).getQuantity());
     }
     @Test
-    public void testDownloadInventoryReport() throws ApiException, IOException {
+    public void testDownloadInventoryReport() throws ApiException {
         BrandForm brandForm = new BrandForm();
         brandForm.setBrand("");
         brandForm.setCategory("");
@@ -135,11 +175,11 @@ public class ReportsControllerTest extends AbstractUnitTest {
         assertEquals(1, salesReportData.size());
         assertEquals("brand1", salesReportData.get(0).getBrand());
         assertEquals("cat1", salesReportData.get(0).getCategory());
-        assertEquals(Integer.valueOf(100), salesReportData.get(0).getQuantity());
-        assertEquals(Double.valueOf(10000.0), salesReportData.get(0).getRevenue());
+        assertEquals(Integer.valueOf(1100), salesReportData.get(0).getQuantity());
+        assertEquals(Double.valueOf(20000.0), salesReportData.get(0).getRevenue());
     }
     @Test
-    public void testDownloadSalesReport() throws ApiException, IOException {
+    public void testDownloadSalesReport() throws ApiException {
         SalesReportForm salesReportForm = new SalesReportForm();
         salesReportForm.setBrand("");
         salesReportForm.setCategory("");
@@ -155,7 +195,7 @@ public class ReportsControllerTest extends AbstractUnitTest {
         assertEquals(1, dailyReportData.size());
     }
     @Test
-    public void testDownloadDailyReport() throws ApiException, IOException {
+    public void testDownloadDailyReport() throws ApiException {
         reportsDto.generateDailyReport();
         ResponseEntity<byte[]> result = controller.downloadDailyReport();
         assertNotEquals(0, result.toString().length());

@@ -8,7 +8,7 @@ import com.increff.pos.model.form.OrderForm;
 import com.increff.pos.model.form.OrderItemForm;
 import com.increff.pos.pojo.OrderItemPojo;
 import com.increff.pos.pojo.OrderPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.util.StringUtil;
 
 import java.text.DecimalFormat;
@@ -20,15 +20,9 @@ public class OrderHelperUtil {
     public static OrderPojo convertOrder(OrderForm f){
         OrderPojo p = new OrderPojo();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("UTC-4"));
-        System.out.println(zonedDateTime);
         p.setCreated_at(zonedDateTime);
         p.setIsInvoiceGenerated(Boolean.FALSE);
-        System.out.println(p.getCreated_at());
         return p;
-    }
-    public static OrderForm convertOrder(OrderPojo p){
-        OrderForm f = new OrderForm();
-        return f;
     }
 
     public static OrderItemPojo convertOrderItem(OrderItemForm f){
@@ -43,7 +37,7 @@ public class OrderHelperUtil {
         orderItemData.setSellingPrice(p.getSellingPrice());
         return orderItemData;
     }
-    public static OrderData convertOrderForm(List<OrderItemData> orderItemDataList, OrderPojo orderPojo){
+    public static OrderData convertOrderData(List<OrderItemData> orderItemDataList, OrderPojo orderPojo){
         OrderData data = new OrderData();
         data.setId(orderPojo.getId());
         data.setDateTime(String.valueOf(orderPojo.getCreated_at().withZoneSameInstant(ZoneId.of("UTC") )));
@@ -51,42 +45,18 @@ public class OrderHelperUtil {
         data.setIsInvoiceGenerated(orderPojo.getIsInvoiceGenerated());
         return data;
     }
-    public static InvoiceData convertInvoiceData(Map<List<Object>, Map<Integer, List<Object>>> invoiceMap){
-        InvoiceData invoiceData = new InvoiceData();
-        List<InvoiceItemData> invoiceItemDataList = new ArrayList<>();
-        invoiceMap.forEach((key, value) -> {
-            List<Object> invoiceValues = key;
-            invoiceData.setOrderId((Integer) invoiceValues.get(0));
-            invoiceData.setTotalAmount((Double) invoiceValues.get(1));
-            invoiceData.setDate((String) invoiceValues.get(2));
-            invoiceData.setTime((String) invoiceValues.get(3));
-            value.forEach((itemKey, itemValue)->{
-                InvoiceItemData invoiceItemData = new InvoiceItemData();
-                invoiceItemData.setIndex(itemKey);
-                invoiceItemData.setQuantity((Integer) itemValue.get(0));
-                invoiceItemData.setBarcode((String) itemValue.get(1));
-                invoiceItemData.setUnitPrice((Double) itemValue.get(2));
-                invoiceItemData.setProduct((String) itemValue.get(3));
-                invoiceItemData.setAmount((Double) itemValue.get(4));
-                invoiceItemDataList.add(invoiceItemData);
-            });
-            invoiceData.setInvoiceItemDataList(invoiceItemDataList);
-        });
-
-        return invoiceData;
-    }
-    public static InvoiceData convertInvoiceData(OrderPojo orderPojo, Double total, String date){
+    public static InvoiceData convertInvoiceData(OrderPojo orderPojo, String date){
         InvoiceData invoiceData = new InvoiceData();
         invoiceData.setOrderId(orderPojo.getId());
-        invoiceData.setTotalAmount(total);
         String time = date.split("T")[1];
         time = time.split("Z")[0];
         date = date.split("T")[0];
         invoiceData.setDate(date);
         invoiceData.setTime(time);
+        invoiceData.setTotalAmount(0.0);
         return invoiceData;
     }
-    public static InvoiceItemData convertInvoiceItemData(OrderItemPojo orderItemPojo,String barcode, String product, Integer index){
+    public static InvoiceItemData convertInvoiceItemData(OrderItemPojo orderItemPojo,String barcode, String product){
         InvoiceItemData invoiceItemData = new InvoiceItemData();
         invoiceItemData.setQuantity(orderItemPojo.getQuantity());
         invoiceItemData.setBarcode(barcode);
@@ -102,9 +72,7 @@ public class OrderHelperUtil {
 
     public static void normalizeOrder(OrderForm form){
         List<OrderItemForm> orderItemFormList = form.getOrderItems();
-        orderItemFormList.forEach(orderItemForm -> {
-            normalizeOrderItem(orderItemForm);
-        });
+        orderItemFormList.forEach(OrderHelperUtil::normalizeOrderItem);
         form.setOrderItems(orderItemFormList);
     }
     public static void normalizeOrderItem(OrderItemForm form){

@@ -1,20 +1,13 @@
 package com.increff.pos.helper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.increff.pos.model.data.ErrorData;
 import com.increff.pos.model.data.InventoryData;
-import com.increff.pos.model.form.BrandForm;
 import com.increff.pos.model.form.InventoryForm;
 import com.increff.pos.pojo.InventoryPojo;
-import com.increff.pos.service.ApiException;
+import com.increff.pos.api.ApiException;
 import com.increff.pos.util.StringUtil;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -24,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryHelperUtil {
-    @Autowired
-    private static ObjectMapper mapper;
+
     public static List<InventoryForm> extractFileInventoryData(MultipartFile file) throws ApiException {
         List<InventoryForm> inventoryFormList = new ArrayList<>();
         int index=0;
@@ -51,7 +43,7 @@ public class InventoryHelperUtil {
         return inventoryFormList;
     }
 
-    public static ResponseEntity<byte[]> convertToTSVFile(List<ErrorData> inventoryErrorDataList) throws IllegalAccessException, IOException {
+    public static ByteArrayOutputStream convertToTSVFile(List<ErrorData> inventoryErrorDataList) throws ApiException {
         StringBuilder tsvData = new StringBuilder();
 
         // Append the header row (if any)
@@ -69,17 +61,12 @@ public class InventoryHelperUtil {
         }
         // create a byte array output stream and write the TSV data to it
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        outputStream.write(tsvData.toString().getBytes());
-
-        // create headers for the response
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("filename", "data.tsv");
-
-        // Create response entity
-        ResponseEntity<byte[]> response = new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
-
-        return response;
+        try {
+            outputStream.write(tsvData.toString().getBytes());
+        }catch (IOException e){
+            throw new ApiException("Unable to convert Data to TSV file");
+        }
+        return outputStream;
 
     }
 
@@ -110,10 +97,11 @@ public class InventoryHelperUtil {
         errorData.setValues(values);
         return errorData;
     }
-    public static InventoryData convertInventory(InventoryPojo p) {
+    public static InventoryData convertInventory(InventoryPojo p, String Barcode) {
         InventoryData d =new InventoryData();
         d.setId(p.getId());
         d.setQuantity(p.getQuantity());
+        d.setBarcode(Barcode);
         return d;
     }
 

@@ -20,12 +20,8 @@ import java.time.ZonedDateTime;
 )
 public class OrderPojo {
     @Id
-    @GeneratedValue(generator = "sequence-generator")
-    @GenericGenerator(name = "sequence-generator", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
-            @Parameter(name = "sequence_name", value = "user_sequence"),
-            @Parameter(name = "initial_value", value = "1001"),
-            @Parameter(name = "increment_size", value = "1")
-    })
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "order_generator")
+    @TableGenerator(name = "order_generator", table = "id_generator", pkColumnName = "id_key", valueColumnName = "id_value", pkColumnValue = "order_id", initialValue = 1000, allocationSize = 1)
     private Integer id;
     @Column(nullable = false)
     private ZonedDateTime created_at;
